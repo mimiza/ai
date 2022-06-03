@@ -2,20 +2,23 @@ import Layer from "./Layer.js"
 
 class Network {
     constructor() {
-        this.layers = []
+        this.layers = new Map()
     }
-    
-    createLayer(n) {
-        
+
+    createLayer(config = {}) {
+        const layer = new Layer(config)
+        this.layers.set(layer.id, layer)
     }
-    
+
+    connect() {}
+
     backup() {
-        
+        // Create JSON data representing the whole network.
     }
-    
+
     restore() {
-        
+        // Restore the whole network from given JSON data.
     }
 }
 
-import default Network
+export default Network
