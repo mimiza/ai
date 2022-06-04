@@ -1,27 +1,30 @@
+import { uid } from "./Utils.js"
+
 class Neuron {
     constructor(config = {}) {
-        this.id = config.id || this.uid()
-        this.ins = []
-        this.outs = []
-        this.bias = config.bias || this.getBias()
+        this["#"] = config["#"] || uid() // Unique ID.
+        this["<"] = [] // Incoming connections.
+        this[">"] = [] // Outcoming connections.
+        this.bias = config.b || this.getBias()
+        this.output = 0
     }
 
-    getBias() {
-        const min = -5
-        const max = 5
-        return Math.floor(Math.random() * (max - min) - max)
+    get id() {
+        return this["#"]
     }
 
-    uid() {
-        return Date.now().toString(36) + Math.floor(Math.random() * 999999999).toString(36)
+    get inputs() {
+        return this["<"]
     }
 
-    sigmoid(x) {
-        return 1 / (1 + Math.exp(-x))
+    get outputs() {
+        return this[">"]
     }
 
-    ReLU(x) {
-        return Math.max(0, x)
+    getBias(min, max) {
+        min = min || -5
+        max = max || 5
+        return Math.floor(Math.random() * (max - min)) - Math.abs(min)
     }
 }
 

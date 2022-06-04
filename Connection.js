@@ -1,6 +1,19 @@
 class Connection {
     constructor(config = {}) {
-        Object.assign(this, config)
+        this["<"] = config["<"] || config.from // Origin neuron from where this connection starts.
+        this[">"] = config[">"] || config.to // Destination neuron to where this connection ends.
+        this.weight = config.weight || Math.random()
+        this.change = config.change || 0
+        this.from.outputs.push(connection)
+        this.to.inputs.push(connection)
+    }
+
+    get from() {
+        return this["<"]
+    }
+
+    get to() {
+        return this[">"]
     }
 }
 
