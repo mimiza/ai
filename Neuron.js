@@ -1,12 +1,14 @@
-import { uid } from "./Utils.js"
+import { uid, random } from "./Utils.js"
 
 class Neuron {
     constructor(config = {}) {
-        this["#"] = config["#"] || uid() // Unique ID.
-        this["<"] = [] // Incoming connections.
-        this[">"] = [] // Outcoming connections.
-        this.bias = config.b || this.getBias()
-        this.output = 0
+        this["#"] = config["#"] || config.id || uid() // Unique ID.
+        this["<"] = config["<"] || config.inputs || [] // Incoming connections.
+        this[">"] = config[">"] || config.outputs || [] // Outcoming connections.
+        this.b = config.b || config.bias || random(-5, 5)
+        this.o = 0
+        this.e = config.e || config.error || 0
+        this.d = config.d || config.delta || 0
     }
 
     get id() {
@@ -21,10 +23,40 @@ class Neuron {
         return this[">"]
     }
 
-    getBias(min, max) {
-        min = min || -5
-        max = max || 5
-        return Math.floor(Math.random() * (max - min)) - Math.abs(min)
+    get bias() {
+        return this.b
+    }
+
+    set bias(value) {
+        this.b = value
+        return this.b
+    }
+
+    get output() {
+        return this.o
+    }
+
+    set output(value) {
+        this.o = value
+        return this.o
+    }
+
+    get error() {
+        return this.e
+    }
+
+    set error(value) {
+        this.e = value
+        return this.e
+    }
+
+    get delta() {
+        return this.d
+    }
+
+    set delta(value) {
+        this.d = value
+        return this.d
     }
 }
 

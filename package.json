@@ -4,7 +4,9 @@
     "version": "1.0.0",
     "description": "Personal AI library in NodeJS",
     "main": "index.js",
-    "scripts": {},
+    "scripts": {
+        "test": "node test.js"
+    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/mimiza/ai.git"
@@ -14,5 +16,8 @@
     "bugs": {
         "url": "https://github.com/mimiza/ai/issues"
     },
-    "homepage": "https://github.com/mimiza/ai#readme"
+    "homepage": "https://github.com/mimiza/ai#readme",
+    "devDependencies": {
+        "prettier": "2.6.2"
+    }
 }
