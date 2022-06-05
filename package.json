@@ -5,7 +5,8 @@
     "description": "Personal AI library in NodeJS",
     "main": "index.js",
     "scripts": {
-        "test": "node test.js"
+        "test": "node test.js",
+        "format": "npx prettier --write ."
     },
     "repository": {
         "type": "git",

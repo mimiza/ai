@@ -5,8 +5,8 @@ class Connection {
         this.w = config.w || config.weight || Math.random()
         this.c = config.c || config.change || 0
         if (!this["<"] || !this[">"]) return undefined
-        this.from?.outputs.push(connection)
-        this.to?.inputs.push(connection)
+        this.from?.outputs.push(this)
+        this.to?.inputs.push(this)
     }
 
     get from() {

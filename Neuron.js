@@ -5,7 +5,7 @@ class Neuron {
         this["#"] = config["#"] || config.id || uid() // Unique ID.
         this["<"] = config["<"] || config.inputs || [] // Incoming connections.
         this[">"] = config[">"] || config.outputs || [] // Outcoming connections.
-        this.b = config.b || config.bias || random(-5, 5)
+        this.b = config.b || config.bias || random(-1, 1)
         this.o = 0
         this.e = config.e || config.error || 0
         this.d = config.d || config.delta || 0

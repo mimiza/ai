@@ -4,10 +4,17 @@ import { sigmoid } from "./Utils.js"
 
 class Network {
     constructor(config = {}) {
+        this.config = config
         this.layers = []
         this.rate = config.rate || 0.1
         this.momentum = config.momentum || 0.1
         this.iterations = config.iterations || 0
+        this.initialize()
+    }
+
+    initialize() {
+        if (Array.isArray(this.config.layers)) this.config.layers.forEach(layer => this.createLayer(layer))
+        this.connect()
     }
 
     createLayer(config = {}) {
@@ -36,8 +43,8 @@ class Network {
         return this.propagate()
     }
 
-    input(inputs = []) {
-        this.layers[0].forEach((neuron, index) => (neuron.output = inputs[index]))
+    input(input = []) {
+        this.layers[0].neurons.forEach((neuron, index) => (neuron.output = input[index]))
     }
 
     propagate() {
@@ -50,22 +57,19 @@ class Network {
             })
         })
         // Return the output layer.
-        return this.layers.slice(-1).neurons.map(n => n.output)
+        return this.layers[this.layers.length - 1].neurons.map(n => n.output)
     }
 
     backpropagate(target) {
-        this.layers
-            .slice()
-            .reverse()
-            .forEach((layer, i) =>
-                layer.neurons.forEach((neuron, j) => {
-                    let error = 0
-                    if (i === 0) error = target[j] - neuron.output
-                    else neuron.outputs.forEach(connection => (error += connection.to.delta * connection.weight))
-                    neuron.error = error
-                    neuron.delta = error * neuron.output * (1 - neuron.output)
-                })
-            )
+        ;[...this.layers].reverse().forEach((layer, i) =>
+            layer.neurons.forEach((neuron, j) => {
+                let error = 0
+                if (i === 0) error = target[j] - neuron.output
+                else neuron.outputs.forEach(connection => (error += connection.to.delta * connection.weight))
+                neuron.error = error
+                neuron.delta = error * neuron.output * (1 - neuron.output)
+            })
+        )
     }
 
     adjust() {
@@ -77,7 +81,7 @@ class Network {
                     connection.change = change
                     connection.weight += change
                 })
-                neutron.bias += this.rate * neuron.delta
+                neuron.bias += this.rate * neuron.delta
             })
         })
     }
