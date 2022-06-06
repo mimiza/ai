@@ -19,7 +19,17 @@ class Neuron {
         return this["<"]
     }
 
+    set inputs(value) {
+        this["<"] = value
+        return this["<"]
+    }
+
     get outputs() {
+        return this[">"]
+    }
+
+    set outputs(value) {
+        this[">"] = value
         return this[">"]
     }
 

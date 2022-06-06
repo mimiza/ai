@@ -59,11 +59,12 @@ class Network {
 
     createLayer(config = {}) {
         const layer = new Layer(config)
-        if (layer) return this.layers.push(layer)
+        if (layer) this.layers.push(layer)
+        return layer
     }
 
     connect(L1, L2) {
-        if (L1 && L2) return L1.neurons.forEach(from => L2.neurons.forEach(to => new Connection({ "<": from, ">": to })))
+        if (L1 && L2) return L1.neurons.forEach(from => L2.neurons.forEach(to => new Connection({ from, to })))
         // Connect all the neurons of current layer with the neurons of its last layer.
         this.layers.forEach((layer, index) => {
             if (index === 0) return
@@ -106,7 +107,7 @@ class Network {
     }
 
     backpropagate(target) {
-        return [...this.layers].reverse().forEach((layer, i) =>
+        ;[...this.layers].reverse().forEach((layer, i) =>
             layer.neurons.forEach((neuron, j) => {
                 let error = 0
                 if (i === 0) error = target[j] - neuron.output
@@ -159,23 +160,37 @@ class Network {
 
     restore(data = {}) {
         // Restore the whole network from given JSON data.
+        if (typeof data === "string") {
+            try {
+                data = JSON.parse(data)
+                if (typeof data !== "object") return
+            } catch {}
+        }
+
         // Reset network layers.
         this.layers = []
-        for (const key in data) {
-            if (typeof data[key] !== "object") this[key] = data[key]
-            // Restore network layers.
-            data.l.forEach((item, index) => {
-                const layer = this.createLayer(item)
-                if (index === 0) return
-                // Connect neurons together.
-                // const last = this.layers[index - 1]
-                layer.neurons.forEach(neuron => {
-                    neuron.inputs.forEach(config => {
-                        // Restore connections.
+        for (const key in data) if (typeof data[key] !== "object") this[key] = data[key]
+        // Restore network layers.
+        data.l.forEach((item, index) => {
+            const layer = this.createLayer(item)
+            if (index === 0) return
+            // Connect neurons together.
+            layer.neurons.forEach(neuron => {
+                const inputs = neuron.inputs
+                // Reset connections.
+                neuron.inputs = []
+                neuron.outputs = []
+                inputs.forEach(config => {
+                    config[">"] = neuron
+                    this.layers[index - 1].neurons.forEach(item => {
+                        if (item.id === config["<"]) {
+                            config["<"] = item
+                            new Connection(config)
+                        }
                     })
                 })
             })
-        }
+        })
     }
 }
 
