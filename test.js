@@ -31,7 +31,7 @@ const RAND = [
 const test = data => {
     const results = []
     const network = new Network({ layers: [2, 10, 10, 1] })
-    for (let i = 0; i < 5000; i++) data.forEach(d => network.train(d.input, d.output))
+    for (let i = 0; i < 50000; i++) data.forEach(d => network.train(d.input, d.output))
 
     for (let i = 0; i < 10; i++)
         data.forEach(d => {
@@ -49,5 +49,8 @@ const testjson = data => {
     return results
 }
 
-//console.log("RAND", test(XOR))
-testjson(XOR)
+console.log("XOR", test(XOR))
+console.log("OR", test(OR))
+console.log("AND", test(AND))
+console.log("RAND", test(RAND))
+// testjson(XOR)

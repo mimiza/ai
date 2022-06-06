@@ -1,24 +1,15 @@
+import { Layers, Neurons, Connections } from "./Context.js"
 import Connection from "./Connection.js"
 import Layer from "./Layer.js"
 
 class Network {
     constructor(config = {}) {
-        this.l = []
         this.a = config.a || config.activator || "sigmoid"
         this.r = config.r || config.rate || 0.1
         this.m = config.m || config.momentum || 0.1
         this.i = config.i || config.iterations || 0
-        if (Array.isArray(config.layers)) config.layers.forEach(layer => this.createLayer(layer))
+        if (Array.isArray(config.layers)) config.layers.forEach(layer => new Layer(layer))
         this.connect()
-    }
-
-    get layers() {
-        return this.l
-    }
-
-    set layers(value) {
-        this.l = value
-        return this.l
     }
 
     get activator() {
@@ -57,17 +48,13 @@ class Network {
         return this.i
     }
 
-    createLayer(config = {}) {
-        const layer = new Layer(config)
-        if (layer) return this.layers.push(layer)
-    }
-
     connect(L1, L2) {
-        if (L1 && L2) return L1.neurons.forEach(from => L2.neurons.forEach(to => new Connection({ "<": from, ">": to })))
-        // Connect all the neurons of current layer with the neurons of its last layer.
-        this.layers.forEach((layer, index) => {
+        if (L1 && L2) return L1.neurons.forEach(N1 => L2.neurons.forEach(N2 => new Connection({ from: N1.id, to: N2.id })))
+        // If no L1 and L2 given, just connect all the neurons of all layers.
+        const layers = [...Layers.values()]
+        layers.forEach((layer, index) => {
             if (index === 0) return
-            this.connect(this.layers[index - 1], layer)
+            this.connect(layers[index - 1], layer)
         })
     }
 
@@ -85,16 +72,12 @@ class Network {
     }
 
     input(input = []) {
-        this.layers[0].neurons.forEach((neuron, index) => (neuron.output = input[index]))
-    }
-
-    activate(input) {
-        return this[this.activator](input)
+        return [...Layers.values()].shift().neurons.forEach((neuron, index) => (neuron.output = input[index]))
     }
 
     propagate() {
-        this.layers.forEach((layer, index) => {
-            if (index === 0) return
+        Layers.forEach((layer, id) => {
+            if ([...Layers.keys()].indexOf(id) === 0) return
             layer.neurons.forEach(neuron => {
                 // Multiply weights and outputs, then summarize all together.
                 const sum = neuron.inputs.reduce((value, connection) => value + connection.weight * connection.from.output, 0)
@@ -102,14 +85,18 @@ class Network {
             })
         })
         // Return the output layer.
-        return [...this.layers].pop().neurons.map(n => n.output)
+        return [...Layers.values()].pop().neurons.map(neuron => neuron.output)
     }
 
-    backpropagate(target) {
-        return [...this.layers].reverse().forEach((layer, i) =>
+    activate(input) {
+        return this[this.activator](input)
+    }
+
+    backpropagate(output) {
+        return [...Layers.values()].reverse().forEach((layer, i) =>
             layer.neurons.forEach((neuron, j) => {
                 let error = 0
-                if (i === 0) error = target[j] - neuron.output
+                if (i === 0) error = output[j] - neuron.output
                 else neuron.outputs.forEach(connection => (error += connection.to.delta * connection.weight))
                 neuron.error = error
                 neuron.delta = error * neuron.output * (1 - neuron.output)
@@ -118,8 +105,8 @@ class Network {
     }
 
     adjust() {
-        this.layers.forEach((layer, index) => {
-            if (index === 0) return
+        Layers.forEach((layer, id) => {
+            if ([...Layers.keys()].indexOf(id) === 0) return
             layer.neurons.forEach(neuron => {
                 neuron.inputs.forEach(connection => {
                     const change = this.rate * neuron.delta * connection.from.output + this.momentum * connection.change

@@ -1,8 +1,8 @@
-import Neuron from "./Neuron.js"
-import Layer from "./Layer.js"
 import Network from "./Network.js"
+import Layer from "./Layer.js"
+import Neuron from "./Neuron.js"
 import Connection from "./Neuron.js"
 
-export { Neuron, Layer, Network, Connection }
+export { Network, Layer, Neuron, Connection }
 
 export default Network

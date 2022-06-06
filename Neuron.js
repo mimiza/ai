@@ -1,14 +1,16 @@
 import { uid, random } from "./Utils.js"
+import { Neurons, Connections } from "./Context.js"
 
 class Neuron {
     constructor(config = {}) {
         this["#"] = config["#"] || config.id || uid() // Unique ID.
-        this["<"] = config["<"] || config.inputs || [] // Incoming connections.
-        this[">"] = config[">"] || config.outputs || [] // Outcoming connections.
-        this.b = config.b || config.bias || random(-1, 1)
-        this.o = 0
-        this.e = config.e || config.error || 0
-        this.d = config.d || config.delta || 0
+        this["<"] = config["<"] || config.inputs || [] // List of incoming connection IDs.
+        this[">"] = config[">"] || config.outputs || [] // List of outcoming connection IDs.
+        this.b = config.b || config.bias || random(-1, 1) // Bias.
+        this.e = config.e || config.error || 0 // Error.
+        this.d = config.d || config.delta || 0 // Delta.
+        this.o = 0 // Output.
+        Neurons.set(this.id, this)
     }
 
     get id() {
@@ -16,11 +18,11 @@ class Neuron {
     }
 
     get inputs() {
-        return this["<"]
+        return this["<"].map(connection => Connections.get(connection))
     }
 
     get outputs() {
-        return this[">"]
+        return this[">"].map(connection => Connections.get(connection))
     }
 
     get bias() {
@@ -30,15 +32,6 @@ class Neuron {
     set bias(value) {
         this.b = value
         return this.b
-    }
-
-    get output() {
-        return this.o
-    }
-
-    set output(value) {
-        this.o = value
-        return this.o
     }
 
     get error() {
@@ -57,6 +50,15 @@ class Neuron {
     set delta(value) {
         this.d = value
         return this.d
+    }
+
+    get output() {
+        return this.o
+    }
+
+    set output(value) {
+        this.o = value
+        return this.o
     }
 }
 
