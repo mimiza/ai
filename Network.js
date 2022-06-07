@@ -3,6 +3,7 @@ import Layer from "./Layer.js"
 
 class Network {
     constructor(config = {}) {
+        if (config.l) return this.restore(config)
         this.l = []
         this.a = config.a || config.activator || "sigmoid"
         this.r = config.r || config.rate || 0.1
@@ -57,6 +58,10 @@ class Network {
         return this.i
     }
 
+    get output() {
+        return [...this.layers].pop().neurons.map(n => n.output)
+    }
+
     createLayer(config = {}) {
         const layer = new Layer(config)
         if (layer) this.layers.push(layer)
@@ -103,7 +108,7 @@ class Network {
             })
         })
         // Return the output layer.
-        return [...this.layers].pop().neurons.map(n => n.output)
+        return this.output
     }
 
     backpropagate(target) {
@@ -137,7 +142,7 @@ class Network {
     }
 
     ReLU(x = 0) {
-        return Math.max(0, x)
+        return x > 0 ? 1 : 0
     }
 
     structure(data = this) {
@@ -182,15 +187,16 @@ class Network {
                 neuron.outputs = []
                 inputs.forEach(config => {
                     config[">"] = neuron
-                    this.layers[index - 1].neurons.forEach(item => {
+                    for (const item of this.layers[index - 1].neurons) {
                         if (item.id === config["<"]) {
                             config["<"] = item
-                            new Connection(config)
+                            return new Connection(config)
                         }
-                    })
+                    }
                 })
             })
         })
+        return this
     }
 }
 
