@@ -81,7 +81,6 @@ class Network {
         this.input(input)
         this.propagate()
         this.backpropagate(output)
-        this.adjust()
         this.iterations++
     }
 
@@ -115,26 +114,19 @@ class Network {
         ;[...this.layers].reverse().forEach((layer, i) =>
             layer.neurons.forEach((neuron, j) => {
                 let error = 0
-                if (i === 0) error = target[j] - neuron.output
+                if (i === 0) error = 2 * (neuron.output - target[j])
                 else neuron.outputs.forEach(connection => (error += connection.to.delta * connection.weight))
                 neuron.error = error
-                neuron.delta = error * neuron.output * (1 - neuron.output)
-            })
-        )
-    }
-
-    adjust() {
-        this.layers.forEach((layer, index) => {
-            if (index === 0) return
-            layer.neurons.forEach(neuron => {
+                if (this.activator === "sigmoid") neuron.delta = error * neuron.output * (1 - neuron.output)
+                if (this.activator === "ReLU") neuron.delta = error * this.ReLU(neuron.output)
                 neuron.inputs.forEach(connection => {
                     const change = this.rate * neuron.delta * connection.from.output + this.momentum * connection.change
                     connection.change = change
-                    connection.weight += change
+                    connection.weight -= change
                 })
-                neuron.bias += this.rate * neuron.delta
+                neuron.bias -= this.rate * neuron.delta
             })
-        })
+        )
     }
 
     sigmoid(x = 0) {
@@ -142,7 +134,7 @@ class Network {
     }
 
     ReLU(x = 0) {
-        return x > 0 ? 1 : 0
+        return x >= 0 ? 1 : 0
     }
 
     structure(data = this) {
