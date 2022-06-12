@@ -33,11 +33,26 @@ const testNetwork = (data, config = {}) => {
     const network = new Network({ layers: [2, 10, 1], ...config })
     for (let i = 0; i < 50000; i++) data.forEach(d => network.train(d.input, d.output))
 
-    // for (let i = 0; i < 10; i++)
     data.forEach(d => {
         const r = network.calculate(d.input)
-        results.push({ input: d.input, expect: d.output, output: r.map(Math.round), accurate: r.map(Math.round)[0] === d.output[0] })
+        results.push({ i: d.input, e: d.output, o: r.map(Math.round), a: r.map(Math.round)[0] === d.output[0] })
     })
+
+    return results
+}
+
+const testReLUSigmoid = (data, config = {}) => {
+    const results = []
+    const network = new Network({ layers: [2, {neurons: 10, activator: "ReLU"}, 1], ...config })
+    for (let i = 0; i < 50000; i++) data.forEach(d => network.train(d.input, d.output))
+
+    data.forEach(d => {
+        const r = network.calculate(d.input)
+        results.push({ i: d.input, e: d.output, o: r.map(Math.round), a: r.map(Math.round)[0] === d.output[0] })
+    })
+    
+    let backup = JSON.stringify(network.structure(), null, 2)
+    console.log(backup)
 
     return results
 }
@@ -47,15 +62,13 @@ const testBackupRestore = data => {
     const network = new Network({ layers: [2, 10, 1] })
     for (let i = 0; i < 50000; i++) data.forEach(d => network.train(d.input, d.output))
 
-    let backup = JSON.stringify(network.structure())
-
+    let backup = JSON.stringify(network.structure(), null, 2)
     const newNetwork = new Network()
     newNetwork.restore(backup)
 
-    // for (let i = 0; i < 10; i++)
     data.forEach(d => {
         const r = newNetwork.calculate(d.input)
-        results.push({ input: d.input, expect: d.output, output: r.map(Math.round), accurate: r.map(Math.round)[0] === d.output[0] })
+        results.push({ i: d.input, e: d.output, o: r.map(Math.round), a: r.map(Math.round)[0] === d.output[0] })
     })
 
     return results
@@ -65,6 +78,11 @@ console.log("TEST XOR sigmoid", testNetwork(XOR))
 console.log("TEST OR sigmoid", testNetwork(OR))
 console.log("TEST AND sigmoid", testNetwork(AND))
 console.log("TEST RAND sigmoid", testNetwork(RAND))
+
+console.log("TEST XOR ReLUSigmoid", testReLUSigmoid(XOR))
+console.log("TEST OR ReLUSigmoid", testReLUSigmoid(OR))
+console.log("TEST AND ReLUSigmoid", testReLUSigmoid(AND))
+console.log("TEST RAND ReLUSigmoid", testReLUSigmoid(RAND))
 
 console.log("TEST XOR ReLU", testNetwork(XOR, { a: "ReLU", r: 0.01, m: 0.01 }))
 console.log("TEST OR ReLU", testNetwork(OR, { a: "ReLU", r: 0.01, m: 0.01 }))

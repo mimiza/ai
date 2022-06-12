@@ -93,8 +93,8 @@ class Network {
         this.layers[0].neurons.forEach((neuron, index) => (neuron.output = input[index]))
     }
 
-    activate(input) {
-        return this[this.activator](input)
+    activate(input, activator) {
+        return this[activator || this.activator](input)
     }
 
     propagate() {
@@ -103,7 +103,7 @@ class Network {
             layer.neurons.forEach(neuron => {
                 // Multiply weights and outputs, then summarize all together.
                 const sum = neuron.inputs.reduce((value, connection) => value + connection.weight * connection.from.output, 0)
-                neuron.output = this.activate(sum + neuron.bias)
+                neuron.output = this.activate(sum + neuron.bias, layer.activator)
             })
         })
         // Return the output layer.
@@ -141,7 +141,7 @@ class Network {
         if (Array.isArray(data)) return data.map(d => this.structure(d))
         if (typeof data === "object") {
             // If this is a layer, just return an array of its neurons.
-            if (Array.isArray(data.n)) return this.structure(data.n)
+            if (Object.keys(data).length === 1 && Array.isArray(data.n)) return this.structure(data.n)
             const result = {}
             for (const key in data) {
                 // If this is a neuron, ignore output connection array, as well as empty input connection array.
