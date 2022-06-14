@@ -31,65 +31,59 @@ const RAND = [
 const testNetwork = (data, config = {}) => {
     const results = []
     const network = new Network({ layers: [2, 10, 1], ...config })
-    for (let i = 0; i < 50000; i++) data.forEach(d => network.train(d.input, d.output))
+    for (let i = 0; i < 5000; i++) data.forEach(d => network.train(d.input, d.output))
 
-    data.forEach(d => {
+    // data.forEach(d => {
+    //     const r = network.calculate(d.input)
+    //     results.push({ i: d.input, e: d.output, o: r.map(Math.round), a: r.map(Math.round)[0] === d.output[0] })
+    // })
+
+    const test = data.every(d => {
         const r = network.calculate(d.input)
-        results.push({ i: d.input, e: d.output, o: r.map(Math.round), a: r.map(Math.round)[0] === d.output[0] })
+        return r.map(Math.round)[0] === d.output[0]
     })
 
-    return results
+    return test
 }
 
-const testReLUSigmoid = (data, config = {}) => {
+const testBackupRestore = (data, config = {}) => {
     const results = []
-    const network = new Network({ layers: [2, {neurons: 10, activator: "ReLU"}, 1], ...config })
-    for (let i = 0; i < 50000; i++) data.forEach(d => network.train(d.input, d.output))
-
-    data.forEach(d => {
-        const r = network.calculate(d.input)
-        results.push({ i: d.input, e: d.output, o: r.map(Math.round), a: r.map(Math.round)[0] === d.output[0] })
-    })
-    
-    let backup = JSON.stringify(network.structure(), null, 2)
-    console.log(backup)
-
-    return results
-}
-
-const testBackupRestore = data => {
-    const results = []
-    const network = new Network({ layers: [2, 10, 1] })
-    for (let i = 0; i < 50000; i++) data.forEach(d => network.train(d.input, d.output))
+    const network = new Network({ layers: [2, 10, 1], ...config })
+    for (let i = 0; i < 5000; i++) data.forEach(d => network.train(d.input, d.output))
 
     let backup = JSON.stringify(network.structure(), null, 2)
     const newNetwork = new Network()
     newNetwork.restore(backup)
 
-    data.forEach(d => {
+    // data.forEach(d => {
+    //     const r = newNetwork.calculate(d.input)
+    //     results.push({ i: d.input, e: d.output, o: r.map(Math.round), a: r.map(Math.round)[0] === d.output[0] })
+    // })
+
+    const test = data.every(d => {
         const r = newNetwork.calculate(d.input)
-        results.push({ i: d.input, e: d.output, o: r.map(Math.round), a: r.map(Math.round)[0] === d.output[0] })
+        return r.map(Math.round)[0] === d.output[0]
     })
 
-    return results
+    return test
 }
 
-console.log("TEST XOR sigmoid", testNetwork(XOR))
-console.log("TEST OR sigmoid", testNetwork(OR))
-console.log("TEST AND sigmoid", testNetwork(AND))
-console.log("TEST RAND sigmoid", testNetwork(RAND))
+console.log("XOR Sigmoid", testNetwork(XOR))
+console.log("OR Sigmoid", testNetwork(OR))
+console.log("AND Sigmoid", testNetwork(AND))
+console.log("RAND Sigmoid", testNetwork(RAND))
 
-console.log("TEST XOR ReLUSigmoid", testReLUSigmoid(XOR))
-console.log("TEST OR ReLUSigmoid", testReLUSigmoid(OR))
-console.log("TEST AND ReLUSigmoid", testReLUSigmoid(AND))
-console.log("TEST RAND ReLUSigmoid", testReLUSigmoid(RAND))
+console.log("XOR ReLU", testNetwork(XOR, { a: "ReLU" }))
+console.log("OR ReLU", testNetwork(OR, { a: "ReLU" }))
+console.log("AND ReLU", testNetwork(AND, { a: "ReLU" }))
+console.log("RAND ReLU", testNetwork(RAND, { a: "ReLU" }))
 
-console.log("TEST XOR ReLU", testNetwork(XOR, { a: "ReLU", r: 0.01, m: 0.01 }))
-console.log("TEST OR ReLU", testNetwork(OR, { a: "ReLU", r: 0.01, m: 0.01 }))
-console.log("TEST AND ReLU", testNetwork(AND, { a: "ReLU", r: 0.01, m: 0.01 }))
-console.log("TEST RAND ReLU", testNetwork(RAND, { a: "ReLU", r: 0.01, m: 0.01 }))
+console.log("XOR MixedActivator", testNetwork(XOR, { layers: [2, { neurons: 10, activator: "ReLU" }, 1] }))
+console.log("OR MixedActivator", testNetwork(OR, { layers: [2, { neurons: 10, activator: "ReLU" }, 1] }))
+console.log("AND MixedActivator", testNetwork(AND, { layers: [2, { neurons: 10, activator: "ReLU" }, 1] }))
+console.log("RAND MixedActivator", testNetwork(RAND, { layers: [2, { neurons: 10, activator: "ReLU" }, 1] }))
 
-console.log("TEST BACKUP RESTORE XOR", testBackupRestore(XOR))
-console.log("TEST BACKUP RESTORE OR", testBackupRestore(OR))
-console.log("TEST BACKUP RESTORE AND", testBackupRestore(AND))
-console.log("TEST BACKUP RESTORE RAND", testBackupRestore(RAND))
+console.log("XOR Backup/Restore", testBackupRestore(XOR))
+console.log("OR Backup/Restore", testBackupRestore(OR))
+console.log("AND Backup/Restore", testBackupRestore(AND))
+console.log("RAND Backup/Restore", testBackupRestore(RAND))

@@ -1,19 +1,20 @@
 import Neuron from "./Neuron.js"
 
 class Layer {
-    constructor(config) {
-        this.a = config?.a || config?.activator || "sigmoid"
+    constructor(config = {}) {
         this.n = []
-        if (Number.isInteger(config?.n || config?.neurons || config)) for (let i = 0; i < (config?.n || config?.neurons || config); i++) this.create()
-        if (Array.isArray(config?.n || config?.neurons || config)) [...(config?.n || config?.neurons || config)].forEach(neuron => this.create(neuron))
+        const neurons = config.n || config.neurons || config
+        if (Number.isInteger(neurons)) for (let i = 0; i < neurons; i++) this.neuron()
+        if (Array.isArray(neurons)) [...neurons].forEach(neuron => this.neuron(neuron))
+        if (config.a || config.activator) this.a = config.a || config.activator
     }
 
-    create(config = {}) {
+    neuron(config = {}) {
         // Create neuron with or without given config.
         const neuron = new Neuron(config)
         if (neuron) return this.neurons.push(neuron)
     }
-    
+
     get activator() {
         return this.a
     }

@@ -9,7 +9,7 @@ class Network {
         this.r = config.r || config.rate || 0.1
         this.m = config.m || config.momentum || 0.1
         this.i = config.i || config.iterations || 0
-        if (Array.isArray(config.layers)) config.layers.forEach(layer => this.createLayer(layer))
+        if (Array.isArray(config.layers)) config.layers.forEach(layer => this.layer(layer))
         this.connect()
     }
 
@@ -62,7 +62,7 @@ class Network {
         return [...this.layers].pop().neurons.map(n => n.output)
     }
 
-    createLayer(config = {}) {
+    layer(config = {}) {
         const layer = new Layer(config)
         if (layer) this.layers.push(layer)
         return layer
@@ -140,13 +140,15 @@ class Network {
     structure(data = this) {
         if (Array.isArray(data)) return data.map(d => this.structure(d))
         if (typeof data === "object") {
-            // If this is a layer, just return an array of its neurons.
+            // If this is a layer without any configs, just return an array of its neurons.
             if (Object.keys(data).length === 1 && Array.isArray(data.n)) return this.structure(data.n)
             const result = {}
             for (const key in data) {
+                // Skip undefined key
+                if (typeof data[key] === "undefined") continue
                 // If this is a neuron, ignore output connection array, as well as empty input connection array.
                 if (data["#"] && (key === ">" || (key === "<" && !data[key].length))) continue
-                // If this is a connection, only return ids for from and to instead of full object.
+                // If this is a connection, only return ids of "from" and "to" instead of full object.
                 if (!data["#"] && ["<", ">"].includes(key)) result[key] = data[key].id
                 else result[key] = this.structure(data[key])
             }
@@ -169,7 +171,7 @@ class Network {
         for (const key in data) if (typeof data[key] !== "object") this[key] = data[key]
         // Restore network layers.
         data.l.forEach((item, index) => {
-            const layer = this.createLayer(item)
+            const layer = this.layer(item)
             if (index === 0) return
             // Connect neurons together.
             layer.neurons.forEach(neuron => {
