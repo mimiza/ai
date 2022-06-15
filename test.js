@@ -46,14 +46,14 @@ const testNetwork = (data, config = {}) => {
     return test
 }
 
-const testBackupRestore = (data, config = {}) => {
+const testEncodeDecode = (data, config = {}) => {
     const results = []
     const network = new Network({ layers: [2, 10, 1], ...config })
     for (let i = 0; i < 5000; i++) data.forEach(d => network.train(d.input, d.output))
 
-    let backup = JSON.stringify(network.structure(), null, 2)
+    let encode = JSON.stringify(network.encode(), null, 2)
     const newNetwork = new Network()
-    newNetwork.restore(backup)
+    newNetwork.decode(encode)
 
     // data.forEach(d => {
     //     const r = newNetwork.calculate(d.input)
@@ -73,17 +73,17 @@ console.log("OR Sigmoid", testNetwork(OR))
 console.log("AND Sigmoid", testNetwork(AND))
 console.log("RAND Sigmoid", testNetwork(RAND))
 
-console.log("XOR ReLU", testNetwork(XOR, { a: "ReLU" }))
-console.log("OR ReLU", testNetwork(OR, { a: "ReLU" }))
-console.log("AND ReLU", testNetwork(AND, { a: "ReLU" }))
-console.log("RAND ReLU", testNetwork(RAND, { a: "ReLU" }))
+console.log("XOR relu", testNetwork(XOR, { a: "relu" }))
+console.log("OR relu", testNetwork(OR, { a: "relu" }))
+console.log("AND relu", testNetwork(AND, { a: "relu" }))
+console.log("RAND relu", testNetwork(RAND, { a: "relu" }))
 
-console.log("XOR MixedActivator", testNetwork(XOR, { layers: [2, { neurons: 10, activator: "ReLU" }, 1] }))
-console.log("OR MixedActivator", testNetwork(OR, { layers: [2, { neurons: 10, activator: "ReLU" }, 1] }))
-console.log("AND MixedActivator", testNetwork(AND, { layers: [2, { neurons: 10, activator: "ReLU" }, 1] }))
-console.log("RAND MixedActivator", testNetwork(RAND, { layers: [2, { neurons: 10, activator: "ReLU" }, 1] }))
+console.log("XOR MixedActivator", testNetwork(XOR, { layers: [2, { neurons: 10, activator: "relu" }, 1] }))
+console.log("OR MixedActivator", testNetwork(OR, { layers: [2, { neurons: 10, activator: "relu" }, 1] }))
+console.log("AND MixedActivator", testNetwork(AND, { layers: [2, { neurons: 10, activator: "relu" }, 1] }))
+console.log("RAND MixedActivator", testNetwork(RAND, { layers: [2, { neurons: 10, activator: "relu" }, 1] }))
 
-console.log("XOR Backup/Restore", testBackupRestore(XOR))
-console.log("OR Backup/Restore", testBackupRestore(OR))
-console.log("AND Backup/Restore", testBackupRestore(AND))
-console.log("RAND Backup/Restore", testBackupRestore(RAND))
+console.log("XOR Encode/Decode", testEncodeDecode(XOR))
+console.log("OR Encode/Decode", testEncodeDecode(OR))
+console.log("AND Encode/Decode", testEncodeDecode(AND))
+console.log("RAND Encode/Decode", testEncodeDecode(RAND))

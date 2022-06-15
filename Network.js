@@ -3,7 +3,7 @@ import Layer from "./Layer.js"
 
 class Network {
     constructor(config = {}) {
-        if (config.l) return this.restore(config)
+        if (config.l) return this.decode(config)
         this.l = []
         this.a = config.a || config.activator || "sigmoid"
         this.r = config.r || config.rate || 0.1
@@ -118,7 +118,7 @@ class Network {
                 else neuron.outputs.forEach(connection => (error += connection.to.delta * connection.weight))
                 neuron.error = error
                 if (this.activator === "sigmoid") neuron.delta = error * neuron.output * (1 - neuron.output)
-                if (this.activator === "ReLU") neuron.delta = error * this.ReLU(neuron.output)
+                if (this.activator === "relu") neuron.delta = error * (neuron.output > 0 ? 1 : 0)
                 neuron.inputs.forEach(connection => {
                     const change = this.rate * neuron.delta * connection.from.output + this.momentum * connection.change
                     connection.change = change
@@ -133,15 +133,15 @@ class Network {
         return 1 / (1 + Math.exp(-x))
     }
 
-    ReLU(x = 0) {
-        return x >= 0 ? 1 : 0
+    relu(x = 0) {
+        return x >= 0 ? x : 0
     }
 
-    structure(data = this) {
-        if (Array.isArray(data)) return data.map(d => this.structure(d))
+    encode(data = this) {
+        if (Array.isArray(data)) return data.map(d => this.encode(d))
         if (typeof data === "object") {
             // If this is a layer without any configs, just return an array of its neurons.
-            if (Object.keys(data).length === 1 && Array.isArray(data.n)) return this.structure(data.n)
+            if (Object.keys(data).length === 1 && Array.isArray(data.n)) return this.encode(data.n)
             const result = {}
             for (const key in data) {
                 // Skip undefined key
@@ -150,15 +150,15 @@ class Network {
                 if (data["#"] && (key === ">" || (key === "<" && !data[key].length))) continue
                 // If this is a connection, only return ids of "from" and "to" instead of full object.
                 if (!data["#"] && ["<", ">"].includes(key)) result[key] = data[key].id
-                else result[key] = this.structure(data[key])
+                else result[key] = this.encode(data[key])
             }
             return result
         }
         return data
     }
 
-    restore(data = {}) {
-        // Restore the whole network from given JSON data.
+    decode(data = {}) {
+        // Decode the whole network from given JSON data.
         if (typeof data === "string") {
             try {
                 data = JSON.parse(data)
@@ -169,7 +169,7 @@ class Network {
         // Reset network layers.
         this.layers = []
         for (const key in data) if (typeof data[key] !== "object") this[key] = data[key]
-        // Restore network layers.
+        // Decode network layers.
         data.l.forEach((item, index) => {
             const layer = this.layer(item)
             if (index === 0) return
