@@ -1,4 +1,4 @@
-import Network from "./Network.js"
+import Network from "../Network.js"
 
 const XOR = [
     { input: [0, 1], output: [1] },
