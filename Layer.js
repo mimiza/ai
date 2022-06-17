@@ -6,7 +6,7 @@ class Layer {
         const neurons = config.n || config.neurons || config
         if (Number.isInteger(neurons)) for (let i = 0; i < neurons; i++) this.neuron()
         if (Array.isArray(neurons)) [...neurons].forEach(neuron => this.neuron(neuron))
-        if (config.a || config.activator) this.a = config.a || config.activator
+        this.a = config.a || config.activator
     }
 
     neuron(config = {}) {

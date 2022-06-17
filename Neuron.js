@@ -5,10 +5,13 @@ class Neuron {
         this["#"] = config["#"] || config.id || uid() // Unique ID.
         this["<"] = config["<"] || config.inputs || [] // Incoming connections.
         this[">"] = config[">"] || config.outputs || [] // Outcoming connections.
+        this.a = config.a || config.activator
         this.b = config.b || config.bias || random(-1, 1)
-        this.o = 0
-        this.e = config.e || config.error || 0
-        this.d = config.d || config.delta || 0
+        this.o = 0 // Output.
+        this.e = config.e || config.error || 0 // Error, used in backpropagation.
+        this.d = config.d || config.delta || 0 // Delta, used in backpropagation.
+        this.i = config.i || config.iterations || 0 // Iterations, used in NEAT network.
+        this.s = config.s || config.state || true // State, used in NEAT network, true for ACTIVE, and false for INACTIVE.
     }
 
     get id() {
@@ -43,7 +46,7 @@ class Neuron {
     }
 
     get output() {
-        return this.o
+        return this.state ? this.o : 0 // If neuron is INACTIVE, always return 0.
     }
 
     set output(value) {
@@ -67,6 +70,30 @@ class Neuron {
     set delta(value) {
         this.d = value
         return this.d
+    }
+
+    get iterations() {
+        return this.i
+    }
+
+    set iterations(value) {
+        this.i = value
+        return this.i
+    }
+
+    get state() {
+        return this.s
+    }
+
+    set state(value) {
+        this.s = value
+        return this.s
+    }
+
+    sum() {
+        const sum = this.inputs.reduce((value, connection) => value + connection.weight * connection.from.output, 0) + this.bias
+        this.iterations++
+        return this.state ? sum : 0
     }
 }
 

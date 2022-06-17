@@ -4,6 +4,7 @@ class Connection {
         this[">"] = config[">"] || config.to // Destination neuron to where this connection ends.
         this.w = config.w || config.weight || Math.random()
         this.c = config.c || config.change || 0
+        this.s = config.s || config.state || true // State, used in NEAT network, true for ACTIVE, and false for INACTIVE.
         if (!this["<"] || !this[">"]) return undefined
         this.from?.outputs.push(this)
         this.to?.inputs.push(this)
@@ -43,6 +44,15 @@ class Connection {
     set change(value) {
         this.c = value
         return this.c
+    }
+
+    get state() {
+        return this.s
+    }
+
+    set state(value) {
+        this.s = value
+        return this.s
     }
 }
 

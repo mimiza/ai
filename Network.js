@@ -3,13 +3,15 @@ import Layer from "./Layer.js"
 
 class Network {
     constructor(config = {}) {
-        if (config.l) return this.decode(config)
+        if (typeof config === "string") return this.decode(config) // Try to decode if type of config is "string" instead of "object".
         this.l = []
+        this.t = config.t || config.type || "ff"
         this.a = config.a || config.activator || "sigmoid"
-        this.r = config.r || config.rate || 0.1
-        this.m = config.m || config.momentum || 0.1
+        this.r = config.r || config.rate || 0.01
+        this.m = config.m || config.momentum || 0.01
         this.i = config.i || config.iterations || 0
-        if (Array.isArray(config.layers)) config.layers.forEach(layer => this.layer(layer))
+        const layers = config.l || config.layers
+        if (Array.isArray(layers)) layers.forEach(layer => this.layer(layer))
         this.connect()
     }
 
@@ -20,6 +22,15 @@ class Network {
     set layers(value) {
         this.l = value
         return this.l
+    }
+
+    get type() {
+        return this.t
+    }
+
+    set type(value) {
+        this.t = value
+        return this.t
     }
 
     get activator() {
@@ -102,8 +113,9 @@ class Network {
             if (index === 0) return
             layer.neurons.forEach(neuron => {
                 // Multiply weights and outputs, then summarize all together.
-                const sum = neuron.inputs.reduce((value, connection) => value + connection.weight * connection.from.output, 0)
-                neuron.output = this.activate(sum + neuron.bias, layer.activator)
+                const sum = neuron.inputs.reduce((value, connection) => value + connection.weight * connection.from.output, 0) + neuron.bias
+                const activator = neuron.activator || layer.activator || this.activator
+                neuron.output = this.activate(sum, activator)
             })
         })
         // Return the output layer.
@@ -117,8 +129,15 @@ class Network {
                 if (i === 0) error = 2 * (neuron.output - target[j])
                 else neuron.outputs.forEach(connection => (error += connection.to.delta * connection.weight))
                 neuron.error = error
-                if (this.activator === "sigmoid") neuron.delta = error * neuron.output * (1 - neuron.output)
-                if (this.activator === "relu") neuron.delta = error * (neuron.output > 0 ? 1 : 0)
+                const activator = neuron.activator || layer.activator || this.activator
+                switch (activator) {
+                    case "sigmoid":
+                        neuron.delta = error * neuron.output * (1 - neuron.output)
+                        break
+                    case "relu":
+                        neuron.delta = error * (neuron.output > 0 ? 1 : neuron.output < 0 ? 0 : undefined) || error
+                        break
+                }
                 neuron.inputs.forEach(connection => {
                     const change = this.rate * neuron.delta * connection.from.output + this.momentum * connection.change
                     connection.change = change
@@ -134,7 +153,7 @@ class Network {
     }
 
     relu(x = 0) {
-        return x >= 0 ? x : 0
+        return Math.max(0, x)
     }
 
     encode(data = this) {
