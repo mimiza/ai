@@ -83,7 +83,7 @@ class Network {
         if (L1 && L2) return L1.neurons.forEach(from => L2.neurons.forEach(to => new Connection({ from, to })))
         // If network type is NEAT, connect the first and last layers.
         if (this.type === "neat") return this.connect(this.layers[0], this.layers[this.layers.length - 1])
-        // Connect all the neurons of current layer with the neurons of its last layer.
+        // Connect each layer's neurons with its surrouding layers' neurons.
         this.layers.forEach((layer, index) => {
             if (index === 0) return
             this.connect(this.layers[index - 1], layer)
