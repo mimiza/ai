@@ -12,7 +12,7 @@ const creatures = []
 
 const evolve = (data, config = {}) => {
     for (let i = 0; i < population; i++) {
-        const creature = new Network({ layers: [2, 0, 1], ...config })
+        const creature = new Network({ layers: [2, 0, 1], type: "neat", ...config })
         creature.mutate()
         creatures.push(creature)
     }

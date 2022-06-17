@@ -5,7 +5,7 @@ class Network {
     constructor(config = {}) {
         if (typeof config === "string") return this.decode(config) // Try to decode if type of config is "string" instead of "object".
         this.l = []
-        this.t = config.t || config.type || "ff"
+        this.t = config.t || config.type || "ff" // Network type, "ff" for feedforward, "neat" for NEAT.
         this.a = config.a || config.activator || "sigmoid"
         this.r = config.r || config.rate || 0.01
         this.m = config.m || config.momentum || 0.01
@@ -81,6 +81,8 @@ class Network {
 
     connect(L1, L2) {
         if (L1 && L2) return L1.neurons.forEach(from => L2.neurons.forEach(to => new Connection({ from, to })))
+        // If network type is NEAT, connect the first and last layers.
+        if (this.type === "neat") return this.connect(this.layers[0], this.layers[this.layers.length - 1])
         // Connect all the neurons of current layer with the neurons of its last layer.
         this.layers.forEach((layer, index) => {
             if (index === 0) return
