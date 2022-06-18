@@ -4,15 +4,17 @@ import Layer from "./Layer.js"
 class Network {
     constructor(config = {}) {
         if (typeof config === "string") return this.decode(config) // Try to decode if type of config is "string" instead of "object".
-        this.l = []
+        this.l = [] // Layers.
+        this.n = [] // Neurons.
+        this.c = [] // Connections.
         this.t = config.t || config.type || "ff" // Network type, "ff" for feedforward, "neat" for NEAT.
         this.a = config.a || config.activator || "sigmoid"
         this.r = config.r || config.rate || 0.01
         this.m = config.m || config.momentum || 0.01
         this.i = config.i || config.iterations || 0
-        const layers = config.l || config.layers
-        if (Array.isArray(layers)) layers.forEach(layer => this.layer(layer))
-        this.connect()
+
+        const layers = config.l || config.layer
+        if (layers) this.createLayers(layers)
     }
 
     get layers() {
@@ -22,6 +24,24 @@ class Network {
     set layers(value) {
         this.l = value
         return this.l
+    }
+
+    get neurons() {
+        return this.n
+    }
+
+    set neurons(value) {
+        this.n = value
+        return this.n
+    }
+
+    get connections() {
+        return this.c
+    }
+
+    set connections(value) {
+        this.c = value
+        return this.c
     }
 
     get type() {
@@ -73,10 +93,27 @@ class Network {
         return [...this.layers].pop().neurons.map(n => n.output)
     }
 
+    createLayers(layers) {
+        if (Array.isArray(layers))
+            layers.forEach(config => {
+                const layer = this.layer(config)
+                const neurons = config.n || config.neurons || config
+                if (Number.isInteger(neurons)) for (let i = 0; i < neurons; i++) this.neuron({ layer })
+                if (Array.isArray(neurons)) neurons.forEach(neuron => this.neuron({ ...neuron, layer }))
+            })
+        this.connect()
+    }
+
     layer(config = {}) {
         const layer = new Layer(config)
         if (layer) this.layers.push(layer)
         return layer
+    }
+
+    neuron(config = {}) {
+        // Create neuron with or without given config.
+        const neuron = new Neuron(config)
+        if (neuron) return [config.layer || this].neurons.push(neuron)
     }
 
     connect(L1, L2) {
