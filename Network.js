@@ -9,10 +9,10 @@ class Network {
         this.n = [] // Neurons.
         this.c = [] // Connections.
         this.t = config.t || config.type || "ff" // Network type, "ff" for feedforward, "neat" for NEAT.
-        this.a = config.a || config.activator || "sigmoid"
-        this.r = config.r || config.rate || 0.01
-        this.m = config.m || config.momentum || 0.01
-        this.i = config.i || config.iterations || 0
+        this.a = config.a || config.activator || "sigmoid" // Activator, used as default activator if no neuron/layer activator exists.
+        this.r = config.r || config.rate || 0.01 // Learning rate, used in FF network.
+        this.m = config.m || config.momentum || 0.01 // Momentum, used in FF network.
+        this.i = config.i || config.iterations || 0 // Iterations, used in FF network.
 
         const layers = config.l || config.layers
         if (layers) this.layer(layers)
@@ -21,7 +21,7 @@ class Network {
         if (neurons) this.neuron(neurons)
 
         const connections = config.c || config.connections
-        if (connections) this.connection({ connections })
+        if (connections) this.connect(connections)
     }
 
     get layers() {
@@ -116,7 +116,10 @@ class Network {
     }
 
     neuron(config = {}) {
-        if (Array.isArray(config)) config.forEach(item => this.neuron(item))
+        if (Array.isArray(config)) return config.forEach(item => this.neuron(item))
+        // This should be fixed?
+        if (config.inputs) for (let i = 0; i < config.inputs; i++) this.neuron({ type: "input", id: this.neurons.length })
+        if (config.outputs) for (let i = 0; i < config.outputs; i++) this.neuron({ type: "output", id: this.neurons.length })
         // Create neuron with or without given config.
         const neuron = new Neuron(config)
         if (neuron) return (config.layer || this).neurons.push(neuron)
@@ -178,7 +181,7 @@ class Network {
     }
 
     backpropagate(target) {
-        ;[...this.layers].reverse().forEach((layer, i) =>
+        return [...this.layers].reverse().forEach((layer, i) =>
             layer.neurons.forEach((neuron, j) => {
                 let error = 0
                 if (i === 0) error = 2 * (neuron.output - target[j])
