@@ -1,5 +1,6 @@
 import Connection from "./Connection.js"
 import Layer from "./Layer.js"
+import Neuron from "./Neuron.js"
 
 class Network {
     constructor(config = {}) {
@@ -13,8 +14,14 @@ class Network {
         this.m = config.m || config.momentum || 0.01
         this.i = config.i || config.iterations || 0
 
-        const layers = config.l || config.layer
-        if (layers) this.createLayers(layers)
+        const layers = config.l || config.layers
+        if (layers) this.layer(layers)
+
+        const neurons = config.n || config.neurons
+        if (neurons) this.neuron(neurons)
+
+        const connections = config.c || config.connections
+        if (connections) this.connection({ connections })
     }
 
     get layers() {
@@ -93,37 +100,46 @@ class Network {
         return [...this.layers].pop().neurons.map(n => n.output)
     }
 
-    createLayers(layers) {
-        if (Array.isArray(layers))
-            layers.forEach(config => {
-                const layer = this.layer(config)
-                const neurons = config.n || config.neurons || config
-                if (Number.isInteger(neurons)) for (let i = 0; i < neurons; i++) this.neuron({ layer })
-                if (Array.isArray(neurons)) neurons.forEach(neuron => this.neuron({ ...neuron, layer }))
-            })
-        this.connect()
-    }
-
     layer(config = {}) {
+        if (Array.isArray(config)) {
+            config.forEach(item => this.layer(item))
+            return this.connect()
+        }
         const layer = new Layer(config)
-        if (layer) this.layers.push(layer)
+        if (layer) {
+            this.layers.push(layer)
+            const neurons = config.n || config.neurons || config
+            if (Number.isInteger(neurons)) for (let i = 0; i < neurons; i++) this.neuron({ layer })
+            if (Array.isArray(neurons)) neurons.forEach(neuron => this.neuron({ ...neuron, layer }))
+        }
         return layer
     }
 
     neuron(config = {}) {
+        if (Array.isArray(config)) config.forEach(item => this.neuron(item))
         // Create neuron with or without given config.
         const neuron = new Neuron(config)
-        if (neuron) return [config.layer || this].neurons.push(neuron)
+        if (neuron) return (config.layer || this).neurons.push(neuron)
     }
 
-    connect(L1, L2) {
-        if (L1 && L2) return L1.neurons.forEach(from => L2.neurons.forEach(to => new Connection({ from, to })))
+    connect(config = {}) {
+        if (Array.isArray(config)) return config.forEach(item => this.connect(item))
+
+        const { from = {}, to = {} } = config
+
+        // If FROM and TO are neurons.
+        if (from.outputs && to.inputs) {
+            const connection = new Connection({ from, to })
+            return this.connections.push(connection) // This needs to be fixed. Must include innovations ID?
+        }
+        // If FROM and TO are layers.
+        if (from.neurons && to.neurons) return from.neurons.forEach(_from => to.neurons.forEach(_to => this.connect({ from: _from, to: _to })))
         // If network type is NEAT, connect the first and last layers.
-        if (this.type === "neat") return this.connect(this.layers[0], this.layers[this.layers.length - 1])
+        if (this.type === "neat") return this.connect({ from: this.layers[0], to: this.layers[this.layers.length - 1] })
         // Connect each layer's neurons with its surrouding layers' neurons.
         this.layers.forEach((layer, index) => {
             if (index === 0) return
-            this.connect(this.layers[index - 1], layer)
+            this.connect({ from: this.layers[index - 1], to: layer })
         })
     }
 
@@ -202,8 +218,8 @@ class Network {
             if (Object.keys(data).length === 1 && Array.isArray(data.n)) return this.encode(data.n)
             const result = {}
             for (const key in data) {
-                // Skip undefined key
-                if (typeof data[key] === "undefined") continue
+                // Skip undefined data and empty array.
+                if (typeof data[key] === "undefined" || (Array.isArray(data[key]) && !data[key].length)) continue
                 // If this is a neuron, ignore output connection array, as well as empty input connection array.
                 if (data["#"] && (key === ">" || (key === "<" && !data[key].length))) continue
                 // If this is a connection, only return ids of "from" and "to" instead of full object.

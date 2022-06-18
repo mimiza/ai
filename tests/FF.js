@@ -70,7 +70,7 @@ console.log("OR mixed", testIO(OR, { layers: [{ neurons: 2, activator: "relu" },
 console.log("AND mixed", testIO(AND, { layers: [{ neurons: 2, activator: "relu" }, { neurons: 10, activator: "relu" }, 1] }))
 console.log("RAND mixed", testIO(RAND, { layers: [{ neurons: 2, activator: "relu" }, { neurons: 10, activator: "relu" }, 1] }))
 
-console.log("XOR Encode/Decode", testEncodeDecode(XOR))
-console.log("OR Encode/Decode", testEncodeDecode(OR))
-console.log("AND Encode/Decode", testEncodeDecode(AND))
-console.log("RAND Encode/Decode", testEncodeDecode(RAND))
+console.log("XOR encode/decode", testEncodeDecode(XOR))
+console.log("OR encode/decode", testEncodeDecode(OR))
+console.log("AND encode/decode", testEncodeDecode(AND))
+console.log("RAND encode/decode", testEncodeDecode(RAND))

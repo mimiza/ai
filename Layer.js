@@ -1,5 +1,3 @@
-import Neuron from "./Neuron.js"
-
 class Layer {
     constructor(config = {}) {
         this.n = []

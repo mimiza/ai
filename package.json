@@ -5,7 +5,7 @@
     "description": "Personal AI library in NodeJS",
     "main": "index.js",
     "scripts": {
-        "testfeedforward": "node tests/feedforward.js",
+        "testff": "node tests/FF.js",
         "testneat": "node tests/NEAT.js",
         "format": "npx prettier --write ."
     },
