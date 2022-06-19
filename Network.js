@@ -4,15 +4,10 @@ import Neuron from "./Neuron.js"
 
 class Network {
     constructor(config = {}) {
-        if (typeof config === "string") return this.decode(config) // Try to decode if type of config is "string" instead of "object".
-        this.l = [] // Layers.
-        this.n = [] // Neurons.
-        this.c = [] // Connections.
-        this.t = config.t || config.type || "ff" // Network type, "ff" for feedforward, "neat" for NEAT.
-        this.a = config.a || config.activator || "sigmoid" // Activator, used as default activator if no neuron/layer activator exists.
-        this.r = config.r || config.rate || 0.01 // Learning rate, used in FF network.
-        this.m = config.m || config.momentum || 0.01 // Momentum, used in FF network.
-        this.i = config.i || config.iterations || 0 // Iterations, used in FF network.
+        // Try to decode if type of config is "string" instead of "object".
+        if (typeof config === "string") return this.decode(config)
+
+        this.initialize(config)
 
         const layers = config.l || config.layers
         if (layers) this.layer(layers)
@@ -100,6 +95,17 @@ class Network {
         return [...this.layers].pop().neurons.map(n => n.output)
     }
 
+    initialize(config = {}) {
+        this.l = [] // Layers.
+        this.n = [] // Neurons.
+        this.c = [] // Connections.
+        this.t = config.t || config.type || "ff" // Network type, "ff" for feedforward, "neat" for NEAT.
+        this.a = config.a || config.activator || "sigmoid" // Activator, used as default activator if no neuron/layer activator exists.
+        this.r = config.r || config.rate || 0.01 // Learning rate, used in FF network.
+        this.m = config.m || config.momentum || 0.01 // Momentum, used in FF network.
+        this.i = config.i || config.iterations || 0 // Iterations, used in FF network.
+    }
+
     layer(config = {}) {
         if (Array.isArray(config) && config.length && config.every(item => !item["#"])) {
             config.forEach(item => this.layer(item))
@@ -107,12 +113,11 @@ class Network {
             return
         }
         const layer = new Layer(config)
-        console.log("CONFIG", config)
         if (layer) {
+            console.log("LAYER CONFIG", config, layer)
             this.layers.push(layer)
             const neurons = config.n || config.neurons || config
             if (Number.isInteger(neurons)) for (let i = 0; i < neurons; i++) this.neuron({ layer })
-            if (Array.isArray(neurons)) neurons.forEach(neuron => this.neuron({ ...neuron, layer }))
         }
         return layer
     }
@@ -123,7 +128,7 @@ class Network {
         config.id = config.id || this.neurons.length + 1
         const neuron = new Neuron(config)
         if (neuron) {
-            config.layer.neurons.push(neuron.id)
+            if (config.layer) config.layer.neurons.push(neuron.id)
             return this.neurons.push(neuron)
         }
     }
@@ -242,7 +247,6 @@ class Network {
     }
 
     decode(data = {}) {
-        console.log("DATA", data)
         // Decode the whole network from given JSON data.
         if (typeof data === "string") {
             try {
@@ -251,31 +255,47 @@ class Network {
             } catch {}
         }
 
-        // Reset network layers.
-        this.layers = []
-        for (const key in data) if (typeof data[key] !== "object") this[key] = data[key]
-        console.log("THIS", this)
-        // Decode network layers.
-        data.l.forEach((item, index) => {
-            const layer = this.layer(item)
-            if (index === 0) return
-            // Connect neurons together.
-            layer.neurons.forEach(neuron => {
-                const inputs = neuron.inputs
-                // Reset connections.
-                neuron.inputs = []
-                neuron.outputs = []
-                inputs.forEach(config => {
-                    config[">"] = neuron
-                    for (const item of this.layers[index - 1].neurons) {
-                        if (item.id === config["<"]) {
-                            config["<"] = item
-                            return new Connection(config)
-                        }
-                    }
+        // Reset network layers, neurons, connections.
+        this.initialize()
+
+        for (const key in data) {
+            // Restore none object properties.
+            if (typeof data[key] !== "object") this[key] = data[key]
+
+            // Restore network layers.
+            if (key === "l")
+                data[key].forEach(item => {
+                    if (Array.isArray(item)) item = { n: item }
+                    this.layer(item)
                 })
-            })
-        })
+
+            // Restore network neurons.
+            if (key === "n") data["n"].forEach(item => this.neuron(item))
+
+            // Restore network connections.
+            if (key === "c")
+                data["c"].forEach((item, index) => {
+                    // Connect neurons.
+                    // Do something here...
+                    return
+                    layer.neurons.forEach(neuron => {
+                        const inputs = neuron.inputs
+                        // Reset connections.
+                        neuron.inputs = []
+                        neuron.outputs = []
+                        inputs.forEach(config => {
+                            config[">"] = neuron
+                            for (const item of this.layers[index - 1].neurons) {
+                                if (item.id === config["<"]) {
+                                    config["<"] = item
+                                    return new Connection(config)
+                                }
+                            }
+                        })
+                    })
+                })
+        }
+
         return this
     }
 }
