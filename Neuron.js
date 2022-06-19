@@ -5,7 +5,6 @@ class Neuron {
         this["#"] = config["#"] || config.id || uid() // Unique ID.
         this["<"] = config["<"] || config.inputs || [] // Incoming connections.
         this[">"] = config[">"] || config.outputs || [] // Outcoming connections.
-        this.t = config.t || config.type || "hidden" // Type, "input", "output", "hidden".
         this.a = config.a || config.activator // Activator, replace layer/network activator.
         this.b = config.b || config.bias || random(-1, 1) // Bias.
         this.o = 0 // Output.
@@ -35,16 +34,6 @@ class Neuron {
     set outputs(value) {
         this[">"] = value
         return this[">"]
-    }
-
-    get type() {
-        return this.t
-    }
-
-    set type(value) {
-        if (!["input", "output", "hidden"].includes(value)) return
-        this.t = value
-        return this.t
     }
 
     get bias() {

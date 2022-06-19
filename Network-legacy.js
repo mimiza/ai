@@ -103,11 +103,9 @@ class Network {
     layer(config = {}) {
         if (Array.isArray(config) && config.length && config.every(item => !item["#"])) {
             config.forEach(item => this.layer(item))
-            // return this.connect()
-            return
+            return this.connect()
         }
         const layer = new Layer(config)
-        console.log("CONFIG", config)
         if (layer) {
             this.layers.push(layer)
             const neurons = config.n || config.neurons || config
@@ -242,7 +240,6 @@ class Network {
     }
 
     decode(data = {}) {
-        console.log("DATA", data)
         // Decode the whole network from given JSON data.
         if (typeof data === "string") {
             try {
@@ -254,7 +251,6 @@ class Network {
         // Reset network layers.
         this.layers = []
         for (const key in data) if (typeof data[key] !== "object") this[key] = data[key]
-        console.log("THIS", this)
         // Decode network layers.
         data.l.forEach((item, index) => {
             const layer = this.layer(item)

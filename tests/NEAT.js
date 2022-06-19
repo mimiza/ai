@@ -12,8 +12,14 @@ const creatures = []
 
 const evolve = (data, config = {}) => {
     for (let i = 0; i < population; i++) {
-        const creature = new Network({ neurons: { inputs: 2, outputs: 1 }, ...config })
+        const creature = new Network({ layers: [2, 0, 1], ...config })
         // creature.mutate()
+
+        const encode = JSON.stringify(creature.encode(), null, 2)
+        console.log(encode)
+
+        process.exit()
+
         creatures.push(creature)
     }
 
