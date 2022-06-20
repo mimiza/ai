@@ -100,7 +100,7 @@ class Network {
         this.n = [] // Neurons.
         this.c = [] // Connections.
         this.t = config.t || config.type || "ff" // Network type, "ff" for feedforward, "neat" for NEAT.
-        this.a = config.a || config.activator || "sigmoid" // Activator, used as default activator if no neuron/layer activator exists.
+        this.a = config.a || config.activator || "sigmoid" // Activator (sigmoid/relu/tanh), used as default activator if no neuron/layer activator exists.
         this.r = config.r || config.rate || 0.01 // Learning rate, used in FF network.
         this.m = config.m || config.momentum || 0.01 // Momentum, used in FF network.
         this.i = config.i || config.iterations || 0 // Iterations, used in FF network.
@@ -230,19 +230,21 @@ class Network {
         return Math.max(0, x)
     }
 
+    tanh(x = 0) {
+        return Math.tanh(x)
+    }
+
     encode(data = this) {
         if (Array.isArray(data)) return data.map(d => this.encode(d))
         if (typeof data === "object") {
             // Reduce data, remove undefined properties.
-            for (const key in data) {
-                if (typeof data[key] === "undefined") delete data[key]
-            }
+            for (const key in data) if (data[key] === undefined) delete data[key]
             // If this is a layer without any configs, just return an array of its neurons.
             if (Object.keys(data).length === 1 && Array.isArray(data.n)) return this.encode(data.n)
             const result = {}
             for (const key in data) {
                 // Skip undefined data and empty array.
-                if (typeof data[key] === "undefined" || (Array.isArray(data[key]) && !data[key].length)) continue
+                if (data[key] === undefined || (Array.isArray(data[key]) && !data[key].length)) continue
                 // If this is a neuron, ignore connection properties.
                 if (data.inputs && data.outputs && (key === ">" || key === "<")) continue
                 // If this is a connection, only return ids of "from" and "to" instead of full object.
