@@ -270,11 +270,11 @@ class Network {
                 })
 
             // Restore network neurons.
-            if (key === "n") data["n"].forEach(item => this.neuron(item))
+            if (key === "n") data[key].forEach(item => this.neuron(item))
 
             // Restore network connections.
             if (key === "c")
-                data["c"].forEach((item, index) => {
+                data[key].forEach((item, index) => {
                     // Connect neurons.
                     // Do something here...
                     return
