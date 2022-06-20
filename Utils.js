@@ -5,7 +5,7 @@ export const uid = () => {
 export const random = (min, max) => {
     min = min || -5
     max = max || 5
-    return Math.floor(Math.random() * (max - min)) - Math.abs(min)
+    return Math.round(Math.random() * (max - min)) - Math.abs(min)
 }
 
 export default { uid, random }

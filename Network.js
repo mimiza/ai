@@ -109,12 +109,10 @@ class Network {
     layer(config = {}) {
         if (Array.isArray(config) && config.length && config.every(item => !item["#"])) {
             config.forEach(item => this.layer(item))
-            // return this.connect()
-            return
+            return this.connect()
         }
         const layer = new Layer(config)
         if (layer) {
-            console.log("LAYER CONFIG", config, layer)
             this.layers.push(layer)
             const neurons = config.n || config.neurons || config
             if (Number.isInteger(neurons)) for (let i = 0; i < neurons; i++) this.neuron({ layer })
@@ -125,7 +123,7 @@ class Network {
     neuron(config = {}) {
         if (Array.isArray(config)) return config.forEach(item => this.neuron(item))
         // Create neuron with or without given config.
-        config.id = config.id || this.neurons.length + 1
+        if (isNaN(config["#"]) || isNaN(config.id)) config.id = this.neurons.length
         const neuron = new Neuron(config)
         if (neuron) {
             if (config.layer) config.layer.neurons.push(neuron.id)
@@ -134,20 +132,28 @@ class Network {
     }
 
     connect(config = {}) {
+        // If the given config is an array of connections.
         if (Array.isArray(config)) return config.forEach(item => this.connect(item))
 
-        const { from = {}, to = {} } = config
+        // If FROM and TO are string/number, try to get their relative neurons.
+        if (!["undefined", "object"].includes(typeof config["<"])) config["<"] = this.neurons[Number(config["<"])]
+        if (!["undefined", "object"].includes(typeof config[">"])) config[">"] = this.neurons[Number(config[">"])]
+        if (!["undefined", "object"].includes(typeof config.from)) config.from = this.neurons[Number(config.from)]
+        if (!["undefined", "object"].includes(typeof config.to)) config.to = this.neurons[Number(config.to)]
+
+        const from = config["<"] || config.from || {}
+        const to = config[">"] || config.to || {}
 
         // If FROM and TO are neurons.
         if (from.outputs && to.inputs) {
-            const connection = new Connection({ from, to })
+            const connection = new Connection(config)
             return this.connections.push(connection) // This needs to be fixed. Must include innovations ID?
         }
+
         // If FROM and TO are layers.
         if (from.neurons && to.neurons) return from.neurons.forEach(_from => to.neurons.forEach(_to => this.connect({ from: _from, to: _to })))
-        // If network type is NEAT, connect the first and last layers.
-        if (this.type === "neat") return this.connect({ from: this.layers[0], to: this.layers[this.layers.length - 1] })
-        // Connect each layer's neurons with its surrouding layers' neurons.
+
+        // If FROM and TO are not provided, connect each layer's neurons with its surrouding layers' neurons.
         this.layers.forEach((layer, index) => {
             if (index === 0) return
             this.connect({ from: this.layers[index - 1], to: layer })
@@ -235,8 +241,8 @@ class Network {
             for (const key in data) {
                 // Skip undefined data and empty array.
                 if (typeof data[key] === "undefined" || (Array.isArray(data[key]) && !data[key].length)) continue
-                // If this is a neuron, ignore output connection array, as well as empty input connection array.
-                if (data.inputs && data.outputs && (key === ">" || (key === "<" && !data[key].length))) continue
+                // If this is a neuron, ignore connection properties.
+                if (data.inputs && data.outputs && (key === ">" || key === "<")) continue
                 // If this is a connection, only return ids of "from" and "to" instead of full object.
                 if (data.from && data.to && ["<", ">"].includes(key)) result[key] = data[key].id
                 else result[key] = this.encode(data[key])
@@ -273,27 +279,7 @@ class Network {
             if (key === "n") data[key].forEach(item => this.neuron(item))
 
             // Restore network connections.
-            if (key === "c")
-                data[key].forEach((item, index) => {
-                    // Connect neurons.
-                    // Do something here...
-                    return
-                    layer.neurons.forEach(neuron => {
-                        const inputs = neuron.inputs
-                        // Reset connections.
-                        neuron.inputs = []
-                        neuron.outputs = []
-                        inputs.forEach(config => {
-                            config[">"] = neuron
-                            for (const item of this.layers[index - 1].neurons) {
-                                if (item.id === config["<"]) {
-                                    config["<"] = item
-                                    return new Connection(config)
-                                }
-                            }
-                        })
-                    })
-                })
+            if (key === "c") data[key].forEach(item => this.connect(item, 1))
         }
 
         return this

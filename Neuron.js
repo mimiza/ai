@@ -2,11 +2,11 @@ import { uid, random } from "./Utils.js"
 
 class Neuron {
     constructor(config = {}) {
-        this["#"] = config["#"] || config.id || uid() // Unique ID.
+        this["#"] = !isNaN(config["#"]) ? Number(config["#"]) : !isNaN(config.id) ? Number(config.id) : uid() // Unique ID. Make sure 0 is also be assigned.
         this["<"] = config["<"] || config.inputs || [] // Incoming connections.
         this[">"] = config[">"] || config.outputs || [] // Outcoming connections.
         this.a = config.a || config.activator // Activator, replace layer/network activator.
-        this.b = config.b || config.bias || random(-1, 1) // Bias.
+        this.b = !isNaN(config.b) ? Number(config.b) : !isNaN(config.bias) ? Number(config.bias) : random(-1, 1) // Bias. Make sure 0 is also be assigned.
         this.o = 0 // Output.
         this.e = config.e || config.error || 0 // Error, used in backpropagation.
         this.d = config.d || config.delta || 0 // Delta, used in backpropagation.
