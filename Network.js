@@ -92,7 +92,7 @@ class Network {
     }
 
     get output() {
-        return [...this.layers].pop().neurons.map(n => n.output)
+        return [...this.layers].pop().neurons.map(n => this.neurons[n].output)
     }
 
     initialize(config = {}) {
@@ -173,7 +173,7 @@ class Network {
     }
 
     input(input = []) {
-        this.layers[0].neurons.forEach((neuron, index) => (neuron.output = input[index]))
+        this.layers[0].neurons.forEach((neuron, index) => (this.neurons[neuron].output = input[index]))
     }
 
     activate(input, activator) {
@@ -185,6 +185,7 @@ class Network {
             if (index === 0) return
             layer.neurons.forEach(neuron => {
                 // Multiply weights and outputs, then summarize all together.
+                neuron = this.neurons[neuron]
                 const sum = neuron.inputs.reduce((value, connection) => value + connection.weight * connection.from.output, 0) + neuron.bias
                 const activator = neuron.activator || layer.activator || this.activator
                 neuron.output = this.activate(sum, activator)
@@ -197,6 +198,7 @@ class Network {
     backpropagate(target) {
         return [...this.layers].reverse().forEach((layer, i) =>
             layer.neurons.forEach((neuron, j) => {
+                neuron = this.neurons[neuron]
                 let error = 0
                 if (i === 0) error = 2 * (neuron.output - target[j])
                 else neuron.outputs.forEach(connection => (error += connection.to.delta * connection.weight))
