@@ -92,7 +92,7 @@ class Network {
     }
 
     get output() {
-        return [...this.layers].pop().neurons.map(n => this.neurons[n].output)
+        return [...this.layers].pop().neurons.map(neuron => neuron.output)
     }
 
     initialize(config = {}) {
@@ -126,7 +126,7 @@ class Network {
         if (isNaN(config["#"]) || isNaN(config.id)) config.id = this.neurons.length
         const neuron = new Neuron(config)
         if (neuron) {
-            if (config.layer) config.layer.neurons.push(neuron.id)
+            if (config.layer) config.layer.neurons.push(neuron)
             return this.neurons.push(neuron)
         }
     }
@@ -173,7 +173,7 @@ class Network {
     }
 
     input(input = []) {
-        this.layers[0].neurons.forEach((neuron, index) => (this.neurons[neuron].output = input[index]))
+        this.layers[0].neurons.forEach((neuron, index) => (neuron.output = input[index]))
     }
 
     activate(input, activator) {
@@ -185,7 +185,6 @@ class Network {
             if (index === 0) return
             layer.neurons.forEach(neuron => {
                 // Multiply weights and outputs, then summarize all together.
-                neuron = this.neurons[neuron]
                 const sum = neuron.inputs.reduce((value, connection) => value + connection.weight * connection.from.output, 0) + neuron.bias
                 const activator = neuron.activator || layer.activator || this.activator
                 neuron.output = this.activate(sum, activator)
@@ -198,7 +197,6 @@ class Network {
     backpropagate(target) {
         return [...this.layers].reverse().forEach((layer, i) =>
             layer.neurons.forEach((neuron, j) => {
-                neuron = this.neurons[neuron]
                 let error = 0
                 if (i === 0) error = 2 * (neuron.output - target[j])
                 else neuron.outputs.forEach(connection => (error += connection.to.delta * connection.weight))
@@ -239,8 +237,10 @@ class Network {
         if (typeof data === "object") {
             // Reduce data, remove undefined properties.
             for (const key in data) if (data[key] === undefined) delete data[key]
-            // If this is a layer without any configs, just return an array of its neurons.
-            if (Object.keys(data).length === 1 && Array.isArray(data.n)) return this.encode(data.n)
+            // If this is a layer, transform its array of neurons.
+            if (Object.keys(data).length <= 2 && Array.isArray(data.n)) data.n = data.n.map(neuron => neuron.id)
+            // If this is a layer without configs, just return its array of neurons.
+            if (Object.keys(data).length === 1 && data.n) return data.n
             const result = {}
             for (const key in data) {
                 // Skip undefined data and empty array.
@@ -264,28 +264,22 @@ class Network {
                 if (typeof data !== "object") return
             } catch {}
         }
-
         // Reset network layers, neurons, connections.
         this.initialize()
-
         for (const key in data) {
             // Restore none object properties.
             if (typeof data[key] !== "object") this[key] = data[key]
-
-            // Restore network layers.
-            if (key === "l")
-                data[key].forEach(item => {
-                    if (Array.isArray(item)) item = { n: item }
-                    this.layer(item)
-                })
-
-            // Restore network neurons.
-            if (key === "n") data[key].forEach(item => this.neuron(item))
-
-            // Restore network connections.
-            if (key === "c") data[key].forEach(item => this.connect(item, 1))
+            
         }
-
+        // Restore network neurons.
+        data.n.forEach(item => this.neuron(item))
+        // Restore network layers.
+        data.l.forEach(item => {
+            if (Array.isArray(item)) item = item.map(neuron => this.neurons[neuron])
+            this.layer(item)
+        })
+        // Restore network connections.
+        data.c.forEach(item => this.connect(item))
         return this
     }
 }
