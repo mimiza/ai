@@ -232,6 +232,26 @@ class Network {
         return Math.tanh(x)
     }
 
+    static crossover(parents = []) {
+        // Sort parents by fitness.
+        parents = parents.sort((a, b) => b.fitness - a.fitness)
+        // Crossover neurons.
+        const neurons = []
+        const connections = []
+        parents.forEach(parent =>
+            parent.neurons.forEach(neuron => {
+                if (neurons.every(item => item.id !== neuron.id)) neurons.push(neuron)
+                if (connections.every(item => item.from !== connection.from && item.to !== connection.to)) connections.push(connection)
+            })
+        )
+    }
+
+    mutate() {
+        // Mutate node.
+        // Mutate connections.
+        // Muate weights.
+    }
+
     encode(data = this) {
         if (Array.isArray(data)) return data.map(d => this.encode(d))
         if (typeof data === "object") {
@@ -269,7 +289,6 @@ class Network {
         for (const key in data) {
             // Restore none object properties.
             if (typeof data[key] !== "object") this[key] = data[key]
-            
         }
         // Restore network neurons.
         data.n.forEach(item => this.neuron(item))

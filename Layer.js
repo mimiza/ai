@@ -1,6 +1,6 @@
 class Layer {
     constructor(config = {}) {
-        this.n = Array.isArray(config) ? config : config .n || []
+        this.n = Array.isArray(config) ? config : config.n || []
         this.a = config.a || config.activator
     }
 
