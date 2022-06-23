@@ -232,18 +232,31 @@ class Network {
         return Math.tanh(x)
     }
 
+    static speciate(creatures = []) {
+        const species = []
+        creatures.sort((a, b) => b.n.length - a.n.length)
+        creatures.forEach(creature => {
+            const neurons = creature.n.map(n => n.id + (n.activator || "")).join("-")
+            const connections = creatures.c.map(c => c.from.id + (c.from.activator || "") + c.to.id + (c.to.activator || ""))
+            const id = neurons + connections
+        })
+    }
+
     static crossover(parents = []) {
         // Sort parents by fitness.
         parents = parents.sort((a, b) => b.fitness - a.fitness)
         // Crossover neurons.
-        const neurons = []
-        const connections = []
-        parents.forEach(parent =>
-            parent.neurons.forEach(neuron => {
-                if (neurons.every(item => item.id !== neuron.id)) neurons.push(neuron)
-                if (connections.every(item => item.from !== connection.from && item.to !== connection.to)) connections.push(connection)
+        const n = []
+        const c = []
+        parents.forEach(parent => {
+            parent.n.forEach(neuron => {
+                if (n.every(item => item["#"] !== neuron["#"])) n.push(neuron)
             })
-        )
+            parent.c.forEach(connection => {
+                if (c.every(item => item["<"] !== connection["<"] && item[">"] !== connection[">"])) c.push(connection)
+            })
+        })
+        return { n, c }
     }
 
     mutate() {
