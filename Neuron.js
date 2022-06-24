@@ -44,9 +44,9 @@ class Neuron {
         this.b = value
         return this.b
     }
-    
+
     get input() {
-        return this.inputs.reduce((value, connection) => value += connection.weight * connection.from.output, 0) + this.bias
+        return this.inputs.reduce((value, connection) => (value += connection.weight * connection.from.output), 0) + this.bias
     }
 
     get output() {
