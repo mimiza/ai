@@ -44,6 +44,10 @@ class Neuron {
         this.b = value
         return this.b
     }
+    
+    get input() {
+        return this.inputs.reduce((value, connection) => value += connection.weight * connection.from.output, 0) + this.bias
+    }
 
     get output() {
         return this.state ? this.o : 0 // If neuron is INACTIVE, always return 0.
@@ -88,12 +92,6 @@ class Neuron {
     set state(value) {
         this.s = value
         return this.s
-    }
-
-    sum() {
-        const sum = this.inputs.reduce((value, connection) => value + connection.weight * connection.from.output, 0) + this.bias
-        this.iterations++
-        return this.state ? sum : 0
     }
 }
 

@@ -185,9 +185,8 @@ class Network {
             if (index === 0) return
             layer.neurons.forEach(neuron => {
                 // Multiply weights and outputs, then summarize all together.
-                const sum = neuron.inputs.reduce((value, connection) => value + connection.weight * connection.from.output, 0) + neuron.bias
                 const activator = neuron.activator || layer.activator || this.activator
-                neuron.output = this.activate(sum, activator)
+                neuron.output = this.activate(neuron.input, activator)
             })
         })
         // Return the output layer.
