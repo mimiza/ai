@@ -194,6 +194,19 @@ class Species {
             this.players[i].fitness /= this.players.length
         }
     }
+    
+    excessDisjoint(N1 = {}, N2 = {}) {
+        var matching = 0
+        for (var i = 0; i < N1.genes.length; i++) {
+            for (var j = 0; j < N2.genes.length; j++) {
+                if (N1.genes[i].innovationNo === N2.genes[j].innovationNo) {
+                    matching++
+                    break
+                }
+            }
+        }
+        return brain1.genes.length + brain2.genes.length - 2 * matching //return no of excess and disjoint genes
+    }
 
     static speciate(creatures = []) {
         const species = []
@@ -228,3 +241,5 @@ class Species {
         // Muate weights.
     }
 }
+
+export default Species
