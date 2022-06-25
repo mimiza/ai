@@ -22,66 +22,11 @@ class Species {
     }
 
     //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //returns whether the parameter genome is in this species
-    sameSpecies(g) {
-        var compatibility
-        var excessAndDisjoint = this.getExcessDisjoint(g, this.rep) //get the number of excess and disjoint genes between this player and the current species this.rep
-        var averageWeightDiff = this.averageWeightDiff(g, this.rep) //get the average weight difference between matching genes
-
-        var largeGenomeNormaliser = g.genes.length - 20
-        if (largeGenomeNormaliser < 1) {
-            largeGenomeNormaliser = 1
-        }
-
-        compatibility = (this.excessCoeff * excessAndDisjoint) / largeGenomeNormaliser + this.weightDiffCoeff * averageWeightDiff //compatibility formula
-        return this.compatibilityThreshold > compatibility
-    }
-
-    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     //add a player to the species
     addToSpecies(p) {
         this.players.push(p)
     }
 
-    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //returns the number of excess and disjoint genes between the 2 input genomes
-    //i.e. returns the number of genes which dont match
-    getExcessDisjoint(brain1, brain2) {
-        var matching = 0.0
-        for (var i = 0; i < brain1.genes.length; i++) {
-            for (var j = 0; j < brain2.genes.length; j++) {
-                if (brain1.genes[i].innovationNo == brain2.genes[j].innovationNo) {
-                    matching++
-                    break
-                }
-            }
-        }
-        return brain1.genes.length + brain2.genes.length - 2 * matching //return no of excess and disjoint genes
-    }
-    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //returns the avereage weight difference between matching genes in the input genomes
-    averageWeightDiff(brain1, brain2) {
-        if (brain1.genes.length == 0 || brain2.genes.length == 0) {
-            return 0
-        }
-
-        var matching = 0
-        var totalDiff = 0
-        for (var i = 0; i < brain1.genes.length; i++) {
-            for (var j = 0; j < brain2.genes.length; j++) {
-                if (brain1.genes[i].innovationNo == brain2.genes[j].innovationNo) {
-                    matching++
-                    totalDiff += abs(brain1.genes[i].weight - brain2.genes[j].weight)
-                    break
-                }
-            }
-        }
-        if (matching == 0) {
-            //divide by 0 error
-            return 100
-        }
-        return totalDiff / matching
-    }
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     //sorts the species by fitness
     sortSpecies() {
@@ -195,6 +140,20 @@ class Species {
         }
     }
 
+    sameSpecies(g) {
+        var compatibility
+        var excessAndDisjoint = this.getExcessDisjoint(g, this.rep) //get the number of excess and disjoint genes between this player and the current species this.rep
+        var averageWeightDiff = this.averageWeightDiff(g, this.rep) //get the average weight difference between matching genes
+
+        var largeGenomeNormaliser = g.genes.length - 20
+        if (largeGenomeNormaliser < 1) {
+            largeGenomeNormaliser = 1
+        }
+
+        compatibility = (this.excessCoeff * excessAndDisjoint) / largeGenomeNormaliser + this.weightDiffCoeff * averageWeightDiff //compatibility formula
+        return this.compatibilityThreshold > compatibility
+    }
+
     static compare(N1 = {}, N2 = {}) {
         let matching = 0
         let diff = 0
@@ -210,7 +169,7 @@ class Species {
             matching, // The number of matching connection genes.
             unmatching: N1.c.length + N2.c.length - 2 * matching, // The number of unmatching connection genes.
             weightDiff, // Total weight difference.
-            averageWeightDiff: matching === 0 ? 100 : diff / matching // Average weight difference.
+            averageWeightDiff: matching === 0 ? 100 : diff / matching // Average weight difference. Return 100 if matching === 0 to avoid division by 0 error.
         }
     }
 
