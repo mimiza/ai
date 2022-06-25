@@ -1,30 +1,37 @@
-class Species {
-    constructor(p) {
-        this.players = []
-        this.bestFitness = 0
-        this.champ
-        this.averageFitness = 0
-        this.staleness = 0 //how many generations the species has gone without an improvement
-        this.rep
-
-        //--------------------------------------------
-        //coefficients for testing compatibility
-        this.excessCoeff = 1
-        this.weightDiffCoeff = 0.5
-        this.compatibilityThreshold = 3
-        if (p) {
-            this.players.push(p)
-            //since it is the only one in the species it is by default the best
-            this.bestFitness = p.fitness
-            this.rep = p.brain.clone()
-            this.champ = p.cloneForReplay()
-        }
+class Evolution {
+    constructor(config = {}) {
+        this.population = config.population || config || []
+        // Coefficients for compatibility calculation.
+        this.ec = config.ec || config.excessCoefficient || 1
+        this.wdc = config.wdc || config.weightDifferenceCoefficient || 0.5
+        this.ct = config.ct || config.compatibilityThreshold || 3
     }
 
-    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //add a player to the species
-    addToSpecies(p) {
-        this.players.push(p)
+    get excessCoefficient() {
+        return this.ec
+    }
+
+    set excessCoefficient(value) {
+        this.ec = value
+        return this.ec
+    }
+
+    get weightDifferenceCoefficient() {
+        return this.wdc
+    }
+
+    set weightDifferenceCoefficient(value) {
+        this.wdc = value
+        return this.wdc
+    }
+
+    get compatibilityThreshold() {
+        return this.ct
+    }
+
+    set compatibilityThreshold(value) {
+        this.ct = value
+        return this.ct
     }
 
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -140,50 +147,74 @@ class Species {
         }
     }
 
-    sameSpecies(g) {
-        var compatibility
-        var excessAndDisjoint = this.getExcessDisjoint(g, this.rep) //get the number of excess and disjoint genes between this player and the current species this.rep
-        var averageWeightDiff = this.averageWeightDiff(g, this.rep) //get the average weight difference between matching genes
-
-        var largeGenomeNormaliser = g.genes.length - 20
-        if (largeGenomeNormaliser < 1) {
-            largeGenomeNormaliser = 1
-        }
-
-        compatibility = (this.excessCoeff * excessAndDisjoint) / largeGenomeNormaliser + this.weightDiffCoeff * averageWeightDiff //compatibility formula
-        return this.compatibilityThreshold > compatibility
+    speciatePopulation() {
+        // for each neural net
+        population.forEach(nn => {
+            let speciesFound = false
+            // for each species
+            species.forEach(s => {
+                // if there are neural nets in the species
+                if (s.length !== 0) {
+                    // and the neural net has not already been placed in a species
+                    if (!speciesFound) {
+                        // choose random member of species to be the "representative"
+                        const rep = s[Math.floor(Math.random() * s.length)]
+                        // calculate the difference between the two neural nets
+                        const diff = (excessCoeff * nn.disjointAndExcess(rep)) / (Math.max(rep.connectionGenes.length + nn.connectionGenes.length), 1) + weightDiffCoeff * nn.weightDiff(rep)
+                        // if the difference is less than the threshold
+                        if (diff < diffThresh) {
+                            // add the neural net to the species
+                            s.push(nn)
+                            // a species has been found
+                            speciesFound = true
+                        }
+                    }
+                }
+            })
+            // if net didn't fit into any species
+            if (!speciesFound) {
+                // create a new species with the net as its sole member
+                const newSpecies = [nn]
+                // add the new species to the list of all species
+                species.push(newSpecies)
+            }
+        })
     }
 
-    static compare(N1 = {}, N2 = {}) {
-        let matching = 0
-        let diff = 0
+    averageFitness(population = this.population) {
+        return population.reduce((value, creature) => (value += creature.fitness), 0) / population.length
+    }
+
+    compare(N1 = {}, N2 = {}) {
+        let matching = 0 // The number of matching connection genes.
+        let weightDifference = 0 // Total weight difference.
         N1.c.forEach(c1 =>
             N2.c.forEach(c2 => {
                 if (c1["<"]["#"] === c2["<"]["#"] && c1["<"].a === c2["<"].a && c1[">"]["#"] === c2[">"]["#"] && c1[">"].a === c2[">"].a) {
                     matching++
-                    diff += Math.abs(c1.w - c2.w)
+                    weightDiff += Math.abs(c1.w - c2.w)
                 }
             })
         )
-        return {
-            matching, // The number of matching connection genes.
-            unmatching: N1.c.length + N2.c.length - 2 * matching, // The number of unmatching connection genes.
-            weightDiff, // Total weight difference.
-            averageWeightDiff: matching === 0 ? 100 : diff / matching // Average weight difference. Return 100 if matching === 0 to avoid division by 0 error.
-        }
+        const unmatching = N1.c.length + N2.c.length - 2 * matching // The number of unmatching connection genes.
+        const averageWeightDifference = matching === 0 ? 100 : weightDifference / matching // Average weight difference. Return 100 if matching === 0 to avoid division by 0 error.
+        const normalizer = Math.max(N1.connections.length - 20, 1)
+
+        const compatibility = (this.excessCoefficient * unmatching) / normalizer + this.weightDiffCoeff * averageWeightDifference //compatibility formula
+        return this.compatibilityThreshold > compatibility
     }
 
-    static speciate(creatures = []) {
+    speciate(population = this.population) {
         const species = []
-        creatures.sort((a, b) => b.n.length - a.n.length)
-        creatures.forEach(creature => {
+        population.sort((a, b) => b.n.length - a.n.length)
+        population.forEach(creature => {
             const neurons = creature.n.map(n => n.id + (n.activator || "")).join("-")
-            const connections = creatures.c.map(c => c.from.id + (c.from.activator || "") + c.to.id + (c.to.activator || ""))
+            const connections = population.c.map(c => c.from.id + (c.from.activator || "") + c.to.id + (c.to.activator || ""))
             const id = neurons + connections
         })
     }
 
-    static crossover(parents = []) {
+    crossover(parents = []) {
         // Sort parents by fitness.
         parents = parents.sort((a, b) => b.fitness - a.fitness)
         // Crossover neurons.
@@ -200,11 +231,11 @@ class Species {
         return { n, c }
     }
 
-    static mutate() {
+    mutate() {
         // Mutate node.
         // Mutate connections.
         // Muate weights.
     }
 }
 
-export default Species
+export default Evolution
