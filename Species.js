@@ -194,18 +194,24 @@ class Species {
             this.players[i].fitness /= this.players.length
         }
     }
-    
-    excessDisjoint(N1 = {}, N2 = {}) {
-        var matching = 0
-        for (var i = 0; i < N1.genes.length; i++) {
-            for (var j = 0; j < N2.genes.length; j++) {
-                if (N1.genes[i].innovationNo === N2.genes[j].innovationNo) {
+
+    static compare(N1 = {}, N2 = {}) {
+        let matching = 0
+        let diff = 0
+        N1.c.forEach(c1 =>
+            N2.c.forEach(c2 => {
+                if (c1["<"]["#"] === c2["<"]["#"] && c1["<"].a === c2["<"].a && c1[">"]["#"] === c2[">"]["#"] && c1[">"].a === c2[">"].a) {
                     matching++
-                    break
+                    diff += Math.abs(c1.w - c2.w)
                 }
-            }
+            })
+        )
+        return {
+            matching, // The number of matching connection genes.
+            unmatching: N1.c.length + N2.c.length - 2 * matching, // The number of unmatching connection genes.
+            weightDiff, // Total weight difference.
+            averageWeightDiff: matching === 0 ? 100 : diff / matching // Average weight difference.
         }
-        return brain1.genes.length + brain2.genes.length - 2 * matching //return no of excess and disjoint genes
     }
 
     static speciate(creatures = []) {
