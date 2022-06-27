@@ -147,40 +147,6 @@ class Evolution {
         }
     }
 
-    speciatePopulation() {
-        // for each neural net
-        population.forEach(nn => {
-            let speciesFound = false
-            // for each species
-            species.forEach(s => {
-                // if there are neural nets in the species
-                if (s.length !== 0) {
-                    // and the neural net has not already been placed in a species
-                    if (!speciesFound) {
-                        // choose random member of species to be the "representative"
-                        const rep = s[Math.floor(Math.random() * s.length)]
-                        // calculate the difference between the two neural nets
-                        const diff = (excessCoeff * nn.disjointAndExcess(rep)) / (Math.max(rep.connectionGenes.length + nn.connectionGenes.length), 1) + weightDiffCoeff * nn.weightDiff(rep)
-                        // if the difference is less than the threshold
-                        if (diff < diffThresh) {
-                            // add the neural net to the species
-                            s.push(nn)
-                            // a species has been found
-                            speciesFound = true
-                        }
-                    }
-                }
-            })
-            // if net didn't fit into any species
-            if (!speciesFound) {
-                // create a new species with the net as its sole member
-                const newSpecies = [nn]
-                // add the new species to the list of all species
-                species.push(newSpecies)
-            }
-        })
-    }
-
     averageFitness(population = this.population) {
         return population.reduce((value, creature) => (value += creature.fitness), 0) / population.length
     }
@@ -198,7 +164,7 @@ class Evolution {
         )
         const unmatching = N1.c.length + N2.c.length - 2 * matching // The number of unmatching connection genes.
         const averageWeightDifference = matching === 0 ? 100 : weightDifference / matching // Average weight difference. Return 100 if matching === 0 to avoid division by 0 error.
-        const normalizer = Math.max(N1.connections.length - 20, 1)
+        const normalizer = Math.max(N1.c.length + N2.c.length, 1)
 
         const compatibility = (this.excessCoefficient * unmatching) / normalizer + this.weightDiffCoeff * averageWeightDifference //compatibility formula
         return this.compatibilityThreshold > compatibility
@@ -206,12 +172,19 @@ class Evolution {
 
     speciate(population = this.population) {
         const species = []
-        population.sort((a, b) => b.n.length - a.n.length)
-        population.forEach(creature => {
-            const neurons = creature.n.map(n => n.id + (n.activator || "")).join("-")
-            const connections = population.c.map(c => c.from.id + (c.from.activator || "") + c.to.id + (c.to.activator || ""))
-            const id = neurons + connections
+        population.forEach(individual => {
+            const speciate = species.filter(s => {
+                if (s.length) {
+                    // Choose a random individual from the species.
+                    const represent = s[Math.floor(Math.random() * s.length)]
+                    const compare = this.compare(individual, represent)
+                    if (compare) return s.push(individual)
+                }
+                return false
+            })
+            if (!speciate) species.push([individual])
         })
+        return species
     }
 
     crossover(parents = []) {
