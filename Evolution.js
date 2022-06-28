@@ -1,54 +1,12 @@
 class Evolution {
     constructor(config = {}) {
-        this.p = config.p || config.population || config || [] // Population.
-        this.s = config.s || config.species || [] // Species.
+        this.population = config.population || config || [] // Population.
+        this.species = config.species || [] // Species.
+        this.size = 100 // Population size.
         // Coefficients for compatibility calculation.
-        this.e = config.e || config.excessDisjointCoefficient || 1 // Excess and disjoint coefficient.
-        this.w = config.w || config.weightDifferenceCoefficient || 0.5 // Weight difference coefficient.
-        this.c = config.c || config.compatibilityThreshold || 3 // Compatibility threshold.
-    }
-
-    get population() {
-        return this.p
-    }
-
-    set population(value) {
-        this.p = value
-    }
-
-    get species() {
-        return this.s
-    }
-
-    set species(value) {
-        this.s = value
-    }
-
-    get excessDisjointCoefficient() {
-        return this.e
-    }
-
-    set excessDisjointCoefficient(value) {
-        this.e = value
-        return this.e
-    }
-
-    get weightDifferenceCoefficient() {
-        return this.w
-    }
-
-    set weightDifferenceCoefficient(value) {
-        this.w = value
-        return this.w
-    }
-
-    get compatibilityThreshold() {
-        return this.c
-    }
-
-    set compatibilityThreshold(value) {
-        this.c = value
-        return this.c
+        this.excessDisjointCoefficient = config.excessDisjointCoefficient || 1 // Excess and disjoint coefficient.
+        this.weightDifferenceCoefficient = config.weightDifferenceCoefficient || 0.5 // Weight difference coefficient.
+        this.compatibilityThreshold = config.compatibilityThreshold || 3 // Compatibility threshold.
     }
 
     averageFitness(population = this.population) {
@@ -120,9 +78,28 @@ class Evolution {
 
     generate() {
         // Calculate average fitness of the entire population.
-        const averagePopulationFitness = this.averageFitness()
+        const populationFitness = this.averageFitness()
         this.species.forEach(species => {
-            // Calculate average fitness of each individual in the species
+            // Calculate average fitness of each individual in the species.
+            const speciesFitness = this.averageFitness(species)
+            const speciesSize = Math.ceil((speciesFitness / populationFitness) * species.length)
+            for (let i = 0; i < speciesSize; i++) {
+                // Select parent and crossover.
+            }
+        })
+    }
+
+    select(species) {
+        const sorted = [...species].sort((a, b) => b.fitness - a.fitness)
+        const seed = Math.random()
+        if (seed < 0.25) return sorted[0]
+        if (seed < 0.375 && s.length > 1) return sorted[1]
+        if (seed < 0.5 && s.length > 2) return sorted[2]
+        const threshold = Math.random() * species.map(nn => nn.fitness).reduce((t, v) => t + v)
+        let sum = 0
+        return s.find((p, i) => {
+            sum += p.fitness
+            if (sum > threshold) return true
         })
     }
 }
