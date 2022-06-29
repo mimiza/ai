@@ -42,9 +42,11 @@ const testIO = (data, config = {}) => {
 
 const testEncodeDecode = (data, config = {}) => {
     const network = new Network({ layers: [2, 10, 1], ...config })
+    let encode = JSON.stringify(network.encode(), null, 2)
+    console.log(encode)
     for (let i = 0; i < 20000; i++) data.forEach(d => network.train(d.input, d.output))
 
-    let encode = JSON.stringify(network.encode(), null, 2)
+    encode = JSON.stringify(network.encode(), null, 2)
     const newNetwork = new Network(encode)
 
     const test = data.every(d => {
@@ -72,7 +74,7 @@ test("OR mixed", testIO(OR, { layers: [{ neurons: 2, activator: "relu" }, { neur
 test("AND mixed", testIO(AND, { layers: [{ neurons: 2, activator: "relu" }, { neurons: 10, activator: "relu" }, 1] }))
 test("RAND mixed", testIO(RAND, { layers: [{ neurons: 2, activator: "relu" }, { neurons: 10, activator: "relu" }, 1] }))
 
-test("XOR encode/decode", testEncodeDecode(XOR))
-test("OR encode/decode", testEncodeDecode(OR))
-test("AND encode/decode", testEncodeDecode(AND))
-test("RAND encode/decode", testEncodeDecode(RAND))
+test("XOR encode/decode", testEncodeDecode(XOR, { layers: [2, { neurons: 10, activator: "sigmoid" }, 1] }))
+test("OR encode/decode", testEncodeDecode(OR, { layers: [2, { neurons: 10, activator: "sigmoid" }, 1] }))
+test("AND encode/decode", testEncodeDecode(AND, { layers: [2, { neurons: 10, activator: "sigmoid" }, 1] }))
+test("RAND encode/decode", testEncodeDecode(RAND, { layers: [2, { neurons: 10, activator: "sigmoid" }, 1] }))

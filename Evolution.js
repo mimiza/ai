@@ -10,7 +10,7 @@ class Evolution {
     }
 
     averageFitness(population = this.population) {
-        return population.reduce((value, creature) => (value += creature.fitness), 0) / population.length
+        return population.reduce((value, individual) => (value += individual.fitness), 0) / population.length
     }
 
     compare(N1 = {}, N2 = {}) {
@@ -20,15 +20,14 @@ class Evolution {
             N2.c.forEach(c2 => {
                 if (c1["<"]["#"] === c2["<"]["#"] && c1["<"].a === c2["<"].a && c1[">"]["#"] === c2[">"]["#"] && c1[">"].a === c2[">"].a) {
                     matching++
-                    weightDiff += Math.abs(c1.w - c2.w)
+                    weightDifference += Math.abs(c1.w - c2.w)
                 }
             })
         )
-        const unmatching = N1.c.length + N2.c.length - 2 * matching // The number of unmatching connection genes.
+        const unmatching = N1.c.length + N2.c.length - 2 * matching // The number of unmatching connections.
         const averageWeightDifference = matching === 0 ? 100 : weightDifference / matching // Average weight difference. Return 100 if matching === 0 to avoid division by 0 error.
         const normalizer = Math.max(N1.c.length + N2.c.length, 1)
-
-        const compatibility = (this.excessDisjointCoefficient * unmatching) / normalizer + this.weightDiffCoeff * averageWeightDifference //compatibility formula
+        const compatibility = (this.excessDisjointCoefficient * unmatching) / normalizer + this.weightDifferenceCoefficient * averageWeightDifference //compatibility formula
         return this.compatibilityThreshold > compatibility
     }
 
@@ -48,33 +47,34 @@ class Evolution {
                 }
             }
             // If no species found, create a new species for this individual.
-            if (!speciated) species.push([individual])
+            if (!speciated) this.species.push([individual])
         })
         return this.species
     }
 
     crossover(...parents) {
         // Sort parents by fitness.
-        parents = parents.sort((a, b) => b.fitness - a.fitness)
+        parents.sort((a, b) => b.fitness - a.fitness)
         // Crossover neurons.
-        const n = []
-        const c = []
+        const child = {}
         parents.forEach(parent => {
+            for (const key in parent) {
+                if (typeof child[key] === "undefined" && typeof data[key] !== "object") child[key] = parent[key]
+            }
+            
+            
+            const layers = parent.l.n || parent.l
             parent.n.forEach(neuron => {
-                if (n.every(item => item["#"] !== neuron["#"])) n.push(neuron)
+                if (!n.filter(item => item["#"] === neuron["#"]).length) {
+                    n.push(neuron)
+                    
+                }
             })
             parent.c.forEach(connection => {
-                if (c.every(item => item["<"] !== connection["<"] && item[">"] !== connection[">"])) c.push(connection)
+                if (!c.filter(item => item["<"] === connection["<"] && item[">"] !== connection[">"]).length) c.push(connection)
             })
         })
-        return { n, c }
-    }
-
-    mutate(individual = {}) {
-        // Mutate node.
-        // Mutate connections.
-        // Muate weights.
-        return individual
+        return child
     }
 
     generate() {
