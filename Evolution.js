@@ -53,7 +53,7 @@ class Evolution {
         return this.species
     }
 
-    crossover(parents = []) {
+    crossover(...parents) {
         // Sort parents by fitness.
         parents = parents.sort((a, b) => b.fitness - a.fitness)
         // Crossover neurons.
@@ -70,10 +70,11 @@ class Evolution {
         return { n, c }
     }
 
-    mutate() {
+    mutate(individual = {}) {
         // Mutate node.
         // Mutate connections.
         // Muate weights.
+        return individual
     }
 
     generate() {
@@ -85,6 +86,9 @@ class Evolution {
             const speciesSize = Math.ceil((speciesFitness / populationFitness) * species.length)
             for (let i = 0; i < speciesSize; i++) {
                 // Select parents and crossover.
+                const father = this.select(species)
+                const mother = this.select(species)
+                const child = this.crossover(father, mother)
             }
         })
     }
