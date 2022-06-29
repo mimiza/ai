@@ -84,7 +84,7 @@ class Evolution {
             const speciesFitness = this.averageFitness(species)
             const speciesSize = Math.ceil((speciesFitness / populationFitness) * species.length)
             for (let i = 0; i < speciesSize; i++) {
-                // Select parent and crossover.
+                // Select parents and crossover.
             }
         })
     }
@@ -93,12 +93,12 @@ class Evolution {
         const sorted = [...species].sort((a, b) => b.fitness - a.fitness)
         const seed = Math.random()
         if (seed < 0.25) return sorted[0]
-        if (seed < 0.375 && s.length > 1) return sorted[1]
-        if (seed < 0.5 && s.length > 2) return sorted[2]
-        const threshold = Math.random() * species.map(nn => nn.fitness).reduce((t, v) => t + v)
+        if (seed < 0.375 && species.length > 1) return sorted[1]
+        if (seed < 0.5 && species.length > 2) return sorted[2]
+        const threshold = Math.random() * species.reduce((value, individual) => (value += individual.fitness), 0)
         let sum = 0
-        return s.find((p, i) => {
-            sum += p.fitness
+        return species.find(individual => {
+            sum += individual.fitness
             if (sum > threshold) return true
         })
     }
