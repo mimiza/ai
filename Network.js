@@ -91,6 +91,15 @@ class Network {
         return this.i
     }
 
+    get input() {
+        return this.layers[0].neurons.map(neuron => neuron.output)
+    }
+
+    set input(input = []) {
+        this.layers[0].neurons.forEach((neuron, index) => (neuron.output = input[index]))
+        return this.input
+    }
+
     get output() {
         return [...this.layers].pop().neurons.map(neuron => neuron.output)
     }
@@ -161,19 +170,15 @@ class Network {
     }
 
     train(input = [], output = []) {
-        this.input(input)
+        this.input = input
         this.propagate()
         this.backpropagate(output)
         this.iterations++
     }
 
     calculate(input = []) {
-        this.input(input)
+        this.input = input
         return this.propagate()
-    }
-
-    input(input = []) {
-        this.layers[0].neurons.forEach((neuron, index) => (neuron.output = input[index]))
     }
 
     activate(input, activator) {
@@ -217,6 +222,15 @@ class Network {
                 neuron.bias -= this.rate * neuron.delta
             })
         )
+    }
+
+    mutate() {
+        // Add new random neurons.
+        // Change random neuron biases.
+        // Disable random neurons.
+        // Add new random connections.
+        // Change random connection weights.
+        // Disable random connections.
     }
 
     sigmoid(x = 0) {

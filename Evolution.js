@@ -1,3 +1,5 @@
+import Network from "./Network"
+
 class Evolution {
     constructor(config = {}) {
         this.population = config.population || config || [] // Population.
@@ -16,17 +18,17 @@ class Evolution {
     compare(N1 = {}, N2 = {}) {
         let matching = 0 // The number of matching connection genes.
         let weightDifference = 0 // Total weight difference.
-        N1.c.forEach(c1 =>
-            N2.c.forEach(c2 => {
-                if (c1["<"]["#"] === c2["<"]["#"] && c1["<"].a === c2["<"].a && c1[">"]["#"] === c2[">"]["#"] && c1[">"].a === c2[">"].a) {
+        N1.connections.forEach(C1 =>
+            N2.connections.forEach(C2 => {
+                if (C1.from.id === C2.from.id && C1.from.activator === C2.from.activator && C1.to.id === C2.to.id && C1.to.activator === C2.to.activator) {
                     matching++
-                    weightDifference += Math.abs(c1.w - c2.w)
+                    weightDifference += Math.abs(C1.weight - C2.weight)
                 }
             })
         )
-        const unmatching = N1.c.length + N2.c.length - 2 * matching // The number of unmatching connections.
+        const unmatching = N1.connections.length + N2.connections.length - 2 * matching // The number of unmatching connections.
         const averageWeightDifference = matching === 0 ? 100 : weightDifference / matching // Average weight difference. Return 100 if matching === 0 to avoid division by 0 error.
-        const normalizer = Math.max(N1.c.length + N2.c.length, 1)
+        const normalizer = Math.max(N1.connections.length + N2.connections.length, 1)
         const compatibility = (this.excessDisjointCoefficient * unmatching) / normalizer + this.weightDifferenceCoefficient * averageWeightDifference //compatibility formula
         return this.compatibilityThreshold > compatibility
     }
@@ -54,24 +56,21 @@ class Evolution {
 
     crossover(...parents) {
         // Sort parents by fitness.
-        parents.sort((a, b) => b.fitness - a.fitness)
-        // Crossover neurons.
-        const child = {}
+        parents.sort((a, b) => b.fitness - a.fitness).map(parent => parent.encode())
+        // Child looks more like the parent who performs better.
+        const child = new Network(parents.shift())
+        // Get genes from the rest parents and merge into the child.
         parents.forEach(parent => {
-            for (const key in parent) {
-                if (typeof child[key] === "undefined" && typeof data[key] !== "object") child[key] = parent[key]
-            }
-            
-            
-            const layers = parent.l.n || parent.l
-            parent.n.forEach(neuron => {
-                if (!n.filter(item => item["#"] === neuron["#"]).length) {
-                    n.push(neuron)
-                    
-                }
+            // Copy none object properties.
+            for (const key in parent) if (typeof child[key] === "undefined" && typeof data[key] !== "object") child[key] = parent[key]
+            // Copy hidden layer's neurons.
+            const hidden = parent.l[1].n || parent.l[1]
+            hidden.forEach(N1 => {
+                if (!child.layers[1].neurons.filter(N2 => N1["#"] === N2["#"]).length) child.neuron({ layer: 1, ...N1 })
             })
-            parent.c.forEach(connection => {
-                if (!c.filter(item => item["<"] === connection["<"] && item[">"] !== connection[">"]).length) c.push(connection)
+            // Copy connections.
+            parent.c.forEach(C1 => {
+                if (!child.connections.filter(C2 => C1["<"] === C2["<"]["#"] && C1[">"] === C2[">"]["#"]).length) child.connect(C1)
             })
         })
         return child
@@ -89,6 +88,8 @@ class Evolution {
                 const father = this.select(species)
                 const mother = this.select(species)
                 const child = this.crossover(father, mother)
+                child.mutate()
+                // A child is born and mutated. Now how to kill the old ones? Kill them randomly or just kill the worst perfomers?
             }
         })
     }
