@@ -271,7 +271,8 @@ class Network {
         data.n.forEach(item => this.neuron(item))
         // Restore network layers.
         data.l.forEach(item => {
-            if (Array.isArray(item)) item = item.map(neuron => this.neurons[neuron])
+            if (Array.isArray(item)) item = { n: item }
+            item.n = item.n.map(neuron => this.neurons[neuron])
             this.layer(item)
         })
         // Restore network connections.
