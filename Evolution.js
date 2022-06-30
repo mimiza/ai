@@ -77,6 +77,7 @@ class Evolution {
     }
 
     generate() {
+        // THIS NEEDS TO BE FIXED!
         // Calculate average fitness of the entire population.
         const populationFitness = this.averageFitness()
         this.species.forEach(species => {
@@ -85,13 +86,12 @@ class Evolution {
             // Calculate average fitness of each individual in the species.
             const speciesFitness = this.averageFitness(species)
             const speciesSize = Math.ceil((speciesFitness / populationFitness) * species.length)
+            const generation = []
             for (let i = 0; i < speciesSize; i++) {
                 // Select parents and crossover.
-                const father = this.select(species)
-                const mother = this.select(species)
-                const child = this.crossover(father, mother)
+                const child = this.crossover(this.select(species), this.select(species))
                 child.mutate()
-                this.population.push(child)
+                generation.push(child)
                 // Kill the old individuals on the bottom half of the species to save computing energy.
                 // This should be fixed. Species is just a standalone array.
                 species.splice(Math.floor(Math.random() * (species.length / 2) + species.length / 2), 1)

@@ -8,18 +8,32 @@ const XOR = [
     { input: [1, 1], output: [0] }
 ]
 
-const population = 100
-const creatures = []
+const size = 100
+let creatures = []
+
+for (let i = 0; i < size; i++) {
+    const creature = new Network({ layers: [2, 0, 1] })
+    creature.connect({ from: creature.layers[0], to: creature.layers[2] })
+    creature.mutate()
+    creatures.push(creature)
+}
 
 const evolve = (data, config = {}) => {
-    for (let i = 0; i < population; i++) {
-        const creature = new Network({ layers: [2, 0, 1], ...config })
-        creature.connect({ from: creature.layers[0], to: creature.layers[2] })
-        creatures.push(creature)
-    }
-    creatures.forEach(creature => creature.mutate())
-    creatures.map(creature => (creature.fitness = data.filter(d => creature.calculate(d.input).map(Math.round)[0] === d.output[0]).length / data.length))
-    creatures.map(creature => console.log(creature.fitness))
+    creatures.forEach(creature => {
+        // Do exams to get error. Error means how far we are to the goal. Smaller is better.
+        const error = data.map(item => item.output[0] - creature.calculate(item.input)[0]).reduce((value, item) => (value += Math.abs(item)), 0)
+        // Calculate fitness using error. Greater is better.
+        creature.fitness = 1 / error
+    })
+    const evolution = new Evolution({ population: creatures, size })
+    // Now check if goal is reached?
+    // If goal is achieved, return the best individual.
+
+    // If goal is not achieved, continue the circle of life.
+    evolution.speciate()
+    evolution.generate()
+    creatures = evolution.population
+    return evolve()
 }
 
 console.log("XOR", evolve(XOR))
