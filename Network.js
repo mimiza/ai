@@ -164,12 +164,16 @@ class Network {
         }
 
         // If FROM and TO are layers.
-        if (from.neurons && to.neurons) return from.neurons.forEach(_from => to.neurons.forEach(_to => this.connect({ from: _from, to: _to })))
+        if (from.neurons?.length && to.neurons?.length) return from.neurons.forEach(_from => to.neurons.forEach(_to => this.connect({ from: _from, to: _to })))
 
         // If FROM and TO are not provided, connect each layer's neurons with its surrouding layers' neurons.
+        // THIS NEEDS TO BE FIXED!
+        let last
         this.layers.forEach((layer, index) => {
-            if (index === 0) return
-            this.connect({ from: this.layers[index - 1], to: layer })
+            if (layer.neurons.length) last = index
+            if (!layer || index === 0 || index === last) return
+            this.connect({ from: this.layers[last], to: layer })
+            last = index
         })
     }
 

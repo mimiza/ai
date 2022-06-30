@@ -1,6 +1,6 @@
 import Network from "./Network.js"
 
-class Evolution {
+class Ecosystem {
     constructor(config = {}) {
         this.population = config.population || config || [] // Population.
         this.species = config.species || [] // Species.
@@ -9,6 +9,10 @@ class Evolution {
         this.edc = config.edc || config.excessDisjointCoefficient || 1 // Excess and disjoint coefficient.
         this.wdc = config.wdc || config.weightDifferenceCoefficient || 0.5 // Weight difference coefficient.
         this.compatibility = config.compatibility || 3 // Compatibility threshold.
+    }
+    
+    best(population = this.population) {
+        return [...population].sort((a, b) => b.fitness - a.fitness).shift()
     }
 
     averageFitness(population = this.population) {
@@ -55,6 +59,7 @@ class Evolution {
     }
 
     crossover(...parents) {
+        if (parents.some(parent => typeof parent === "undefined")) return
         // Sort parents by fitness.
         parents.sort((a, b) => b.fitness - a.fitness).map(parent => parent.encode())
         // Child looks more like the parent who performs better.
@@ -62,7 +67,7 @@ class Evolution {
         // Get genes from the rest parents and merge into the child.
         parents.forEach(parent => {
             // Copy none object properties.
-            for (const key in parent) if (typeof child[key] === "undefined" && typeof data[key] !== "object") child[key] = parent[key]
+            for (const key in parent) if (typeof child[key] === "undefined" && typeof parent[key] !== "object") child[key] = parent[key]
             // Copy hidden layer's neurons.
             const hidden = parent.l[1].n || parent.l[1]
             hidden.forEach(N1 => {
@@ -114,4 +119,4 @@ class Evolution {
     }
 }
 
-export default Evolution
+export default Ecosystem
