@@ -1,4 +1,4 @@
-import Network from "./Network"
+import Network from "./Network.js"
 
 class Evolution {
     constructor(config = {}) {

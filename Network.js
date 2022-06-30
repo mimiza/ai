@@ -136,7 +136,10 @@ class Network {
         if (isNaN(config["#"]) || isNaN(config.id)) config.id = this.neurons.length
         const neuron = new Neuron(config)
         if (neuron) {
-            if (config.layer) config.layer.neurons.push(neuron)
+            if (config.layer) {
+                if (!isNaN(config.layer)) config.layer = this.layers[config.layer]
+                config.layer.neurons.push(neuron)
+            }
             return this.neurons.push(neuron)
         }
     }
@@ -244,7 +247,6 @@ class Network {
         this.connections.forEach(connection => {
             // Change random connection weight.
             if (Math.random() <= 0.1) connection.weight += connection.weight * 0.01 * random([-1, 1])
-
             // Disable random connections.
             if (Math.random() <= 0.01) connection.state = random([true, false])
         })
@@ -257,7 +259,7 @@ class Network {
         }
 
         // Add new random node between a connection.
-        if (Math.random() <= 0.01) {
+        if (Math.random() <= 0.01 && this.connections.length) {
             const connection = random(this.connections.filter(connection => connection.state))
             const neuron = this.neuron({ layer: 1, activator: random(activators) })
             connection.state = false

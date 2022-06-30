@@ -1,3 +1,4 @@
+import Evolution from "../Evolution.js"
 import Network from "../Network.js"
 
 const XOR = [
@@ -15,15 +16,9 @@ const evolve = (data, config = {}) => {
         const creature = new Network({ layers: [2, 0, 1], ...config })
         creatures.push(creature)
     }
-
-    const results = creatures.map(creature =>
-        data.every(d => {
-            const r = creature.calculate(d.input)
-            return r.map(Math.round)[0] === d.output[0]
-        })
-    )
-
-    return results
+    creatures.forEach(creature => creature.mutate())
+    creatures.map(creature => (creature.fitness = data.filter(d => creature.calculate(d.input).map(Math.round)[0] === d.output[0]).length / data.length))
+    creatures.map(creature => console.log(creature.fitness))
 }
 
 console.log("XOR", evolve(XOR))
