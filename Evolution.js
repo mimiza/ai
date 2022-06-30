@@ -6,9 +6,9 @@ class Evolution {
         this.species = config.species || [] // Species.
         this.size = config.size || 100 // Population size.
         // Coefficients for compatibility calculation.
-        this.excessDisjointCoefficient = config.excessDisjointCoefficient || 1 // Excess and disjoint coefficient.
-        this.weightDifferenceCoefficient = config.weightDifferenceCoefficient || 0.5 // Weight difference coefficient.
-        this.compatibilityThreshold = config.compatibilityThreshold || 3 // Compatibility threshold.
+        this.edc = config.edc || config.excessDisjointCoefficient || 1 // Excess and disjoint coefficient.
+        this.wdc = config.wdc || config.weightDifferenceCoefficient || 0.5 // Weight difference coefficient.
+        this.compatibility = config.compatibility || 3 // Compatibility threshold.
     }
 
     averageFitness(population = this.population) {
@@ -27,10 +27,10 @@ class Evolution {
             })
         )
         const unmatching = N1.connections.length + N2.connections.length - 2 * matching // The number of unmatching connections.
-        const averageWeightDifference = matching === 0 ? 100 : weightDifference / matching // Average weight difference. Return 100 if matching === 0 to avoid division by 0 error.
+        const awd = matching === 0 ? 100 : weightDifference / matching // Average weight difference. Return 100 if matching === 0 to avoid division by 0 error.
         const normalizer = Math.max(N1.connections.length + N2.connections.length, 1)
-        const compatibility = (this.excessDisjointCoefficient * unmatching) / normalizer + this.weightDifferenceCoefficient * averageWeightDifference //compatibility formula
-        return this.compatibilityThreshold > compatibility
+        const compatibility = (this.edc * unmatching) / normalizer + this.wdc * awd // Compatibility formula.
+        return this.compatibility > compatibility
     }
 
     speciate(population = this.population) {
@@ -80,6 +80,8 @@ class Evolution {
         // Calculate average fitness of the entire population.
         const populationFitness = this.averageFitness()
         this.species.forEach(species => {
+            // Sort individuals by fitness.
+            species.sort((a, b) => b.fitness - a.fitness)
             // Calculate average fitness of each individual in the species.
             const speciesFitness = this.averageFitness(species)
             const speciesSize = Math.ceil((speciesFitness / populationFitness) * species.length)
@@ -90,8 +92,9 @@ class Evolution {
                 const child = this.crossover(father, mother)
                 child.mutate()
                 this.population.push(child)
-                // Kill the old individuals to save computing energy.
-                species.splice(Math.floor(Math.random() * species.length), 1)
+                // Kill the old individuals on the bottom half of the species to save computing energy.
+                // This should be fixed. Species is just a standalone array.
+                species.splice(Math.floor(Math.random() * (species.length / 2) + species.length / 2), 1)
             }
         })
     }
