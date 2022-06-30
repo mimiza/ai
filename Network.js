@@ -1,6 +1,7 @@
 import Connection from "./Connection.js"
 import Layer from "./Layer.js"
 import Neuron from "./Neuron.js"
+import { random } from "./Utils.js"
 
 class Network {
     constructor(config = {}) {
@@ -226,7 +227,24 @@ class Network {
 
     mutate() {
         // Add new random neurons.
+        if (Math.random() <= 0.05) this.neuron({ layer: 1, activator: random(["sigmoid", "relu", "tanh"]) })
+
         // Change random neuron biases.
+        this.neurons.forEach(neuron => {
+            if (Math.random() <= 0.05) neuron.bias += neuron.bias * 0.01 * random([-1, 1])
+            if (Math.random() <= 0.01) neuron.state = random([true, false])
+        })
+        
+        this.connections.forEach(connection => {
+            if (Math.random() <= 0.10) connection.weight += connection.weight * 0.01 * random([-1, 1])
+            if (Math.random() <= 0.10) {
+                const from = random(this.neurons)
+                const to = random(this.neurons)
+                if (!this.connections.filter(c => c.from.id === from.id && c.to.id === to.id).length) this.neuron({ from, to })
+            }
+            if (Math.random() <= 0.01) connection.state = random([true, false])
+        })
+
         // Disable random neurons.
         // Add new random connections.
         // Change random connection weights.
