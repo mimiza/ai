@@ -14,6 +14,7 @@ const creatures = []
 const evolve = (data, config = {}) => {
     for (let i = 0; i < population; i++) {
         const creature = new Network({ layers: [2, 0, 1], ...config })
+        creature.connect({ from: creature.layers[0], to: creature.layers[2] })
         creatures.push(creature)
     }
     creatures.forEach(creature => creature.mutate())

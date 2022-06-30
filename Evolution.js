@@ -4,7 +4,7 @@ class Evolution {
     constructor(config = {}) {
         this.population = config.population || config || [] // Population.
         this.species = config.species || [] // Species.
-        this.size = 100 // Population size.
+        this.size = config.size || 100 // Population size.
         // Coefficients for compatibility calculation.
         this.excessDisjointCoefficient = config.excessDisjointCoefficient || 1 // Excess and disjoint coefficient.
         this.weightDifferenceCoefficient = config.weightDifferenceCoefficient || 0.5 // Weight difference coefficient.
@@ -89,7 +89,9 @@ class Evolution {
                 const mother = this.select(species)
                 const child = this.crossover(father, mother)
                 child.mutate()
-                // A child is born and mutated. Now how to kill the old ones? Kill them randomly or just kill the worst perfomers?
+                this.population.push(child)
+                // Kill the old individuals to save computing energy.
+                species.splice(Math.floor(Math.random() * species.length), 1)
             }
         })
     }
