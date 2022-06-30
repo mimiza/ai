@@ -29,7 +29,7 @@ const RAND = [
 ]
 
 const testIO = (data, config = {}) => {
-    const network = new Network({ layers: [2, 10, 1], ...config })
+    const network = new Network({ layers: [2, 0, 10, 0, 1], ...config })
     for (let i = 0; i < 20000; i++) data.forEach(d => network.train(d.input, d.output))
 
     const test = data.every(d => {
@@ -41,7 +41,7 @@ const testIO = (data, config = {}) => {
 }
 
 const testEncodeDecode = (data, config = {}) => {
-    const network = new Network({ layers: [2, 10, 1], ...config })
+    const network = new Network(config)
     for (let i = 0; i < 20000; i++) data.forEach(d => network.train(d.input, d.output))
 
     let encode = JSON.stringify(network.encode(), null, 2)
@@ -77,7 +77,7 @@ test("OR mixed", testIO(OR, { layers: [2, { neurons: 10, activator: "relu" }, { 
 test("AND mixed", testIO(AND, { layers: [2, { neurons: 10, activator: "relu" }, { neurons: 10, activator: "tanh" }, 1] }))
 test("RAND mixed", testIO(RAND, { layers: [2, { neurons: 10, activator: "relu" }, { neurons: 10, activator: "tanh" }, 1] }))
 
-test("XOR encode/decode", testEncodeDecode(XOR, { layers: [2, { neurons: 4, activator: "sigmoid" }, { neurons: 4, activator: "relu" }, 1] }))
-test("OR encode/decode", testEncodeDecode(OR, { layers: [2, { neurons: 4, activator: "sigmoid" }, { neurons: 4, activator: "relu" }, 1] }))
-test("AND encode/decode", testEncodeDecode(AND, { layers: [2, { neurons: 4, activator: "sigmoid" }, { neurons: 4, activator: "relu" }, 1] }))
-test("RAND encode/decode", testEncodeDecode(RAND, { layers: [2, { neurons: 4, activator: "sigmoid" }, { neurons: 4, activator: "relu" }, 1] }))
+test("XOR encode/decode", testEncodeDecode(XOR, { layers: [2, 0, { neurons: 4, activator: "sigmoid" }, 0, { neurons: 4, activator: "relu" }, 1] }))
+test("OR encode/decode", testEncodeDecode(OR, { layers: [2, 0, { neurons: 4, activator: "sigmoid" }, 0, { neurons: 4, activator: "relu" }, 1] }))
+test("AND encode/decode", testEncodeDecode(AND, { layers: [2, 0, { neurons: 4, activator: "sigmoid" }, 0, { neurons: 4, activator: "relu" }, 1] }))
+test("RAND encode/decode", testEncodeDecode(RAND, { layers: [2, 0, { neurons: 4, activator: "sigmoid" }, 0, { neurons: 4, activator: "relu" }, 1] }))

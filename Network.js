@@ -160,20 +160,18 @@ class Network {
         // If FROM and TO are neurons.
         if (from.outputs && to.inputs) {
             const connection = new Connection(config)
-            return this.connections.push(connection) // This needs to be fixed. Must include innovations ID?
+            return this.connections.push(connection)
         }
 
         // If FROM and TO are layers.
         if (from.neurons?.length && to.neurons?.length) return from.neurons.forEach(_from => to.neurons.forEach(_to => this.connect({ from: _from, to: _to })))
 
         // If FROM and TO are not provided, connect each layer's neurons with its surrouding layers' neurons.
-        // THIS NEEDS TO BE FIXED!
-        let last
+        let i
         this.layers.forEach((layer, index) => {
-            if (layer.neurons.length) last = index
-            if (!layer || index === 0 || index === last) return
-            this.connect({ from: this.layers[last], to: layer })
-            last = index
+            if (!layer.neurons?.length) return
+            if (this.layers[i]?.neurons?.length && layer?.neurons?.length && index > i) this.connect({ from: this.layers[i], to: layer })
+            if (layer.neurons?.length) i = index
         })
     }
 

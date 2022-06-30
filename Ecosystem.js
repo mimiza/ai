@@ -10,7 +10,7 @@ class Ecosystem {
         this.wdc = config.wdc || config.weightDifferenceCoefficient || 0.5 // Weight difference coefficient.
         this.compatibility = config.compatibility || 3 // Compatibility threshold.
     }
-    
+
     best(population = this.population) {
         return [...population].sort((a, b) => b.fitness - a.fitness).shift()
     }
@@ -58,12 +58,26 @@ class Ecosystem {
         return this.species
     }
 
+    select(species) {
+        const sorted = [...species].sort((a, b) => b.fitness - a.fitness)
+        const seed = Math.random()
+        if (seed < 0.25) return sorted[0]
+        if (seed < 0.375 && species.length > 1) return sorted[1]
+        if (seed < 0.5 && species.length > 2) return sorted[2]
+        const threshold = Math.random() * species.reduce((value, individual) => (value += individual.fitness), 0)
+        let sum = 0
+        return species.find(individual => {
+            sum += individual.fitness
+            if (sum > threshold) return true
+        })
+    }
+
     crossover(...parents) {
-        if (parents.some(parent => typeof parent === "undefined")) return
+        if (!parents.length || parents.some(parent => typeof parent !== "object")) return
         // Sort parents by fitness.
-        parents.sort((a, b) => b.fitness - a.fitness).map(parent => parent.encode())
+        parents = parents.sort((a, b) => b.fitness - a.fitness).map(parent => parent.encode())
         // Child looks more like the parent who performs better.
-        const child = new Network(parents.shift())
+        const child = new Network(JSON.stringify(parents.shift()))
         // Get genes from the rest parents and merge into the child.
         parents.forEach(parent => {
             // Copy none object properties.
@@ -101,20 +115,6 @@ class Ecosystem {
                 // This should be fixed. Species is just a standalone array.
                 species.splice(Math.floor(Math.random() * (species.length / 2) + species.length / 2), 1)
             }
-        })
-    }
-
-    select(species) {
-        const sorted = [...species].sort((a, b) => b.fitness - a.fitness)
-        const seed = Math.random()
-        if (seed < 0.25) return sorted[0]
-        if (seed < 0.375 && species.length > 1) return sorted[1]
-        if (seed < 0.5 && species.length > 2) return sorted[2]
-        const threshold = Math.random() * species.reduce((value, individual) => (value += individual.fitness), 0)
-        let sum = 0
-        return species.find(individual => {
-            sum += individual.fitness
-            if (sum > threshold) return true
         })
     }
 }

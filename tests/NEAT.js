@@ -8,17 +8,17 @@ const XOR = [
     { input: [1, 1], output: [0] }
 ]
 
-const size = 100
+const size = 20
 let creatures = []
 
 for (let i = 0; i < size; i++) {
     const creature = new Network({ layers: [2, 0, 1] })
-    creature.connect({ from: creature.layers[0], to: creature.layers[2] })
     creature.mutate()
     creatures.push(creature)
 }
 
 const evolve = (data, config = {}) => {
+    console.log("EVOLVE")
     creatures.forEach(creature => {
         // Do exams to get error. Error indicates how far we are to the goal. Smaller is better.
         const error = data.map(item => item.output[0] - creature.calculate(item.input)[0]).reduce((value, item) => (value += Math.abs(item)), 0) / data.length
@@ -34,8 +34,8 @@ const evolve = (data, config = {}) => {
     // If goal is not achieved, continue the circle of life.
     ecosystem.speciate()
     ecosystem.generate()
-    creatures = ecosystem.population
-    return evolve()
+    // creatures = ecosystem.population
+    // return evolve(data, config)
 }
 
 const testXOR = evolve(XOR)
