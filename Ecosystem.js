@@ -99,23 +99,26 @@ class Ecosystem {
         // THIS NEEDS TO BE FIXED!
         // Calculate average fitness of the entire population.
         const populationFitness = this.averageFitness()
+        const generation = []
         this.species.forEach(species => {
             // Sort individuals by fitness.
             species.sort((a, b) => b.fitness - a.fitness)
             // Calculate average fitness of each individual in the species.
             const speciesFitness = this.averageFitness(species)
             const speciesSize = Math.ceil((speciesFitness / populationFitness) * species.length)
-            const generation = []
             for (let i = 0; i < speciesSize; i++) {
                 // Select parents and crossover.
-                const child = this.crossover(this.select(species), this.select(species))
+                const father = this.select(species)
+                const mother = this.select(species)
+                const child = this.crossover(father, mother)
                 child.mutate()
                 generation.push(child)
-                // Kill the old individuals on the bottom half of the species to save computing energy.
-                // This should be fixed. Species is just a standalone array.
-                species.splice(Math.floor(Math.random() * (species.length / 2) + species.length / 2), 1)
             }
         })
+        // Kill the old individuals on the bottom half of the species to save computing energy.
+        // This should be fixed. Species is just a standalone array.
+        generation.forEach(item => this.population.splice(Math.floor(Math.random() * this.population.length), 1))
+        generation.forEach(item => this.population.push(item))
     }
 }
 

@@ -8,7 +8,8 @@ const XOR = [
     { input: [1, 1], output: [0] }
 ]
 
-const size = 2
+let generation = 0
+const size = 20
 let creatures = []
 
 for (let i = 0; i < size; i++) {
@@ -17,7 +18,7 @@ for (let i = 0; i < size; i++) {
 }
 
 const evolve = (data, config = {}) => {
-    console.log("EVOLVE")
+    generation++
     creatures.forEach(creature => {
         // Do exams to get error. Error indicates how far we are to the goal. Smaller is better.
         const error = data.map(item => item.output[0] - creature.calculate(item.input)[0]).reduce((value, item) => (value += Math.abs(item)), 0) / data.length
@@ -25,14 +26,14 @@ const evolve = (data, config = {}) => {
         creature.fitness = 1 - error
     })
     const ecosystem = new Ecosystem({ population: creatures, size })
-    // Now check if goal is reached?
+    console.log("GENERATION", generation, "FITNESS", ecosystem.averageFitness())
     // If goal is achieved, return the best individual.
     if (ecosystem.averageFitness() >= 0.9) return ecosystem.best()
     // If goal is not achieved, continue the circle of life.
     ecosystem.speciate()
     ecosystem.generate()
-    // creatures = ecosystem.population
-    // return evolve(data, config)
+    creatures = [...ecosystem.population]
+    return evolve(data, config)
 }
 
 const testXOR = evolve(XOR)

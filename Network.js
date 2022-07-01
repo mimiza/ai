@@ -285,14 +285,16 @@ class Network {
     encode(data = this) {
         if (Array.isArray(data)) return data.map(d => this.encode(d))
         if (typeof data === "object") {
+            const result = {}
             // Reduce data, remove undefined properties.
             for (const key in data) if (data[key] === undefined) delete data[key]
             // If this is a layer, transform its array of neurons.
-            if (Object.keys(data).length <= 2 && Array.isArray(data.n)) data.n = data.n.map(neuron => neuron["#"])
+            if (Object.keys(data).length <= 2 && Array.isArray(data.n) && data.n.every(n => typeof n === "object")) result.n = data.n.map(neuron => neuron["#"])
             // If this is a layer without configs, just return its array of neurons.
-            if (Object.keys(data).length === 1 && data.n) return data.n
-            const result = {}
+            if (Object.keys(data).length === 1 && data.n) return result.n
             for (const key in data) {
+                // Skip defined data.
+                if (typeof result[key] !== "undefined") continue
                 // Skip undefined data and empty array.
                 if (data[key] === undefined || (Array.isArray(data[key]) && !data[key].length)) continue
                 // If this is a neuron, ignore connection properties.
@@ -319,24 +321,24 @@ class Network {
         // Restore none object properties.
         for (const key in data) if (typeof data[key] !== "object") this[key] = data[key]
         // Restore network neurons.
-        data.n.forEach(item => this.neuron(item))
+        data.n.forEach(item => this.neuron({ ...item }))
         // Restore network layers.
         data.l.forEach(item => {
             if (Array.isArray(item)) item = { n: item }
             item.n = item.n.map(neuron => this.neurons[neuron])
-            this.layer(item)
+            this.layer({ ...item })
         })
         // Restore network connections.
         data.c.forEach(item => this.connect({ ...item }))
         return this
     }
 
-    encoded(code = {}) {
-        // Check if "code" is encoded.
-        if (typeof code === "string") return true
-        if (code?.l?.some(l => Array.isArray(l) || typeof l?.n !== "number")) return true
-        if (code?.n?.some(n => isNaN(n["<"]) && isNaN(n[">"]))) return true
-        if (code?.c?.some(c => isNaN(c["<"]) || isNaN(c[">"]))) return true
+    encoded(data = {}) {
+        // Check if data is encoded.
+        if (typeof data === "string") return true
+        if (data?.l?.some(l => Array.isArray(l) || typeof l?.n !== "number")) return true
+        if (data?.n?.some(n => isNaN(n["<"]) && isNaN(n[">"]))) return true
+        if (data?.c?.some(c => isNaN(c["<"]) || isNaN(c[">"]))) return true
         return false
     }
 }
