@@ -26,7 +26,8 @@ const evolve = (data, config = {}) => {
         creature.fitness = 1 - error
     })
     const ecosystem = new Ecosystem({ population: creatures, size })
-    console.log("GENERATION", generation, "FITNESS", ecosystem.averageFitness())
+    const best = ecosystem.best()
+    console.log("GENERATION", generation, "POPULATION", ecosystem.population.length, "FITNESS", ecosystem.averageFitness(), "BEST", best.fitness, best.neurons.length, best.connections.length)
     // If goal is achieved, return the best individual.
     if (ecosystem.averageFitness() >= 0.9) return ecosystem.best()
     // If goal is not achieved, continue the circle of life.

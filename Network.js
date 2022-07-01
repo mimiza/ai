@@ -140,7 +140,8 @@ class Network {
                 if (!isNaN(config.layer)) config.layer = this.layers[config.layer]
                 config.layer.neurons.push(neuron)
             }
-            return this.neurons.push(neuron)
+            this.neurons.push(neuron)
+            return neuron
         }
     }
 
@@ -237,31 +238,31 @@ class Network {
         const activators = ["sigmoid", "relu", "tanh"]
 
         // Add new random neuron.
-        if (Math.random() <= 0.05) this.neuron({ layer: 1, activator: random(activators) })
+        if (Math.random() <= 0.001) this.neuron({ layer: 1, activator: random(activators) })
 
         this.neurons.forEach(neuron => {
             // Change random neuron biases.
-            if (Math.random() <= 0.05) neuron.bias += neuron.bias * 0.01 * random([-1, 1])
+            if (Math.random() <= 0.1) neuron.bias += neuron.bias * 0.01 * random([-1, 1])
             // Disable random neuron.
-            if (Math.random() <= 0.01) neuron.state = random([true, false])
+            if (Math.random() <= 0.001) neuron.state = random([true, false])
         })
 
         this.connections.forEach(connection => {
             // Change random connection weight.
             if (Math.random() <= 0.1) connection.weight += connection.weight * 0.01 * random([-1, 1])
             // Disable random connections.
-            if (Math.random() <= 0.01) connection.state = random([true, false])
+            if (Math.random() <= 0.001) connection.state = random([true, false])
         })
 
         // Add new random connection.
-        if (Math.random() <= 0.1) {
+        if (Math.random() <= 0.01) {
             const from = random(this.neurons)
             const to = random(this.neurons)
-            if (!this.connections.filter(c => c.from.id === from.id && c.to.id === to.id).length) this.connect({ from, to })
+            if (!this.connections.some(c => c.from.id === from.id && c.to.id === to.id)) this.connect({ from, to })
         }
 
         // Add new random node between a connection.
-        if (Math.random() <= 0.01 && this.connections.length) {
+        if (Math.random() <= 0.001 && this.connections.length) {
             const connection = random(this.connections.filter(connection => connection.state))
             const neuron = this.neuron({ layer: 1, activator: random(activators) })
             connection.state = false

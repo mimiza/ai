@@ -85,11 +85,11 @@ class Ecosystem {
             // Copy hidden layer's neurons.
             const hidden = parent.l[1].n || parent.l[1]
             hidden.forEach(N1 => {
-                if (!child.layers[1].neurons.filter(N2 => N1["#"] === N2["#"]).length) child.neuron({ layer: 1, ...N1 })
+                if (!child.layers[1].neurons.some(N2 => N1 === N2["#"])) child.neuron({ layer: 1, ...N1 })
             })
             // Copy connections.
             parent.c.forEach(C1 => {
-                if (!child.connections.filter(C2 => C1["<"] === C2["<"]["#"] && C1[">"] === C2[">"]["#"]).length) child.connect(C1)
+                if (!child.connections.some(C2 => C1["<"] === C2["<"]["#"] && C1[">"] === C2[">"]["#"])) child.connect(C1)
             })
         })
         return child
