@@ -41,10 +41,10 @@ const testIO = (data, config = {}) => {
 }
 
 const testEncodeDecode = (data, config = {}) => {
-    const network = new Network(config)
+    const network = new Network({ layers: [2, 0, 10, 0, 1], ...config })
     for (let i = 0; i < 20000; i++) data.forEach(d => network.train(d.input, d.output))
 
-    let encode = JSON.stringify(network.encode(), null, 2)
+    let encode = network.encode()
     const newNetwork = new Network(encode)
 
     const test = data.every(d => {

@@ -6,3 +6,4 @@ NEAT algo
         -   sum the input
     -   for all non-sensor and active nodes
         -   calculate the output
+-   encode() data.n bug.

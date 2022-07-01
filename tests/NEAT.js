@@ -8,12 +8,11 @@ const XOR = [
     { input: [1, 1], output: [0] }
 ]
 
-const size = 20
+const size = 2
 let creatures = []
 
 for (let i = 0; i < size; i++) {
     const creature = new Network({ layers: [2, 0, 1] })
-    creature.mutate()
     creatures.push(creature)
 }
 
@@ -24,12 +23,10 @@ const evolve = (data, config = {}) => {
         const error = data.map(item => item.output[0] - creature.calculate(item.input)[0]).reduce((value, item) => (value += Math.abs(item)), 0) / data.length
         // Calculate fitness using error. Greater is better.
         creature.fitness = 1 - error
-        //console.log({error, finess: creature.fitness})
     })
     const ecosystem = new Ecosystem({ population: creatures, size })
     // Now check if goal is reached?
     // If goal is achieved, return the best individual.
-    //console.log(ecosystem.averageFitness())
     if (ecosystem.averageFitness() >= 0.9) return ecosystem.best()
     // If goal is not achieved, continue the circle of life.
     ecosystem.speciate()

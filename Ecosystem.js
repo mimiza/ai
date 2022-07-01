@@ -77,7 +77,7 @@ class Ecosystem {
         // Sort parents by fitness.
         parents = parents.sort((a, b) => b.fitness - a.fitness).map(parent => parent.encode())
         // Child looks more like the parent who performs better.
-        const child = new Network(JSON.stringify(parents.shift()))
+        const child = new Network(parents.shift())
         // Get genes from the rest parents and merge into the child.
         parents.forEach(parent => {
             // Copy none object properties.

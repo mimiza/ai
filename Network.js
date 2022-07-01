@@ -5,16 +5,16 @@ import { random } from "./Utils.js"
 
 class Network {
     constructor(config = {}) {
-        // Try to decode if type of config is "string" instead of "object".
-        if (typeof config === "string") return this.decode(config)
+        // Try to decode if type of config is encoded.
+        if (this.encoded(config)) return this.decode(config)
 
         this.initialize(config)
 
-        const layers = config.l || config.layers
-        if (layers) this.layer(layers)
-
         const neurons = config.n || config.neurons
         if (neurons) this.neuron(neurons)
+
+        const layers = config.l || config.layers
+        if (layers) this.layer(layers)
 
         const connections = config.c || config.connections
         if (connections) this.connect(connections)
@@ -288,7 +288,7 @@ class Network {
             // Reduce data, remove undefined properties.
             for (const key in data) if (data[key] === undefined) delete data[key]
             // If this is a layer, transform its array of neurons.
-            if (Object.keys(data).length <= 2 && Array.isArray(data.n)) data.n = data.n.map(neuron => neuron.id)
+            if (Object.keys(data).length <= 2 && Array.isArray(data.n)) data.n = data.n.map(neuron => neuron["#"])
             // If this is a layer without configs, just return its array of neurons.
             if (Object.keys(data).length === 1 && data.n) return data.n
             const result = {}
@@ -298,7 +298,7 @@ class Network {
                 // If this is a neuron, ignore connection properties.
                 if (data.inputs && data.outputs && (key === ">" || key === "<")) continue
                 // If this is a connection, only return ids of "from" and "to" instead of full object.
-                if (data.from && data.to && ["<", ">"].includes(key)) result[key] = data[key].id
+                if (data.from && data.to && ["<", ">"].includes(key)) result[key] = data[key]["#"]
                 else result[key] = this.encode(data[key])
             }
             return result
@@ -327,8 +327,17 @@ class Network {
             this.layer(item)
         })
         // Restore network connections.
-        data.c.forEach(item => this.connect(item))
+        data.c.forEach(item => this.connect({ ...item }))
         return this
+    }
+
+    encoded(code = {}) {
+        // Check if "code" is encoded.
+        if (typeof code === "string") return true
+        if (code?.l?.some(l => Array.isArray(l) || typeof l?.n !== "number")) return true
+        if (code?.n?.some(n => isNaN(n["<"]) && isNaN(n[">"]))) return true
+        if (code?.c?.some(c => isNaN(c["<"]) || isNaN(c[">"]))) return true
+        return false
     }
 }
 
