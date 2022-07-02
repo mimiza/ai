@@ -1,5 +1,7 @@
 import Network from "../Network.js"
 
+const tests = []
+
 const XOR = [
     { input: [0, 1], output: [1] },
     { input: [1, 0], output: [1] },
@@ -30,7 +32,10 @@ const RAND = [
 
 const testIO = (data, config = {}) => {
     const network = new Network({ layers: [2, 0, 10, 0, 1], ...config })
-    for (let i = 0; i < 20000; i++) data.forEach(d => network.train(d.input, d.output))
+    for (let i = 0; i < 80000; i++) {
+        const item = data[Math.floor(Math.random() * data.length)]
+        network.train(item.input, item.output)
+    }
 
     const test = data.every(d => {
         const r = network.calculate(d.input)
@@ -42,7 +47,10 @@ const testIO = (data, config = {}) => {
 
 const testEncodeDecode = (data, config = {}) => {
     const network = new Network({ layers: [2, 0, 10, 0, 1], ...config })
-    for (let i = 0; i < 20000; i++) data.forEach(d => network.train(d.input, d.output))
+    for (let i = 0; i < 80000; i++) {
+        const item = data[Math.floor(Math.random() * data.length)]
+        network.train(item.input, item.output)
+    }
 
     let encode = network.encode()
     const newNetwork = new Network(encode)
@@ -55,7 +63,12 @@ const testEncodeDecode = (data, config = {}) => {
     return test
 }
 
-const test = (...args) => console.log("TEST:", args[0], "-", args[1] ? "OK" : "FAIL")
+const test = (...args) => {
+    const name = args[0]
+    const result = args[1] ? "OK" : "FAIL"
+    console.log(`Test "${name}": ${result}`)
+    tests.push({ TEST: name, RESULT: result })
+}
 
 test("XOR sigmoid", testIO(XOR))
 test("OR sigmoid", testIO(OR))
@@ -81,3 +94,5 @@ test("XOR encode/decode", testEncodeDecode(XOR, { layers: [2, 0, { neurons: 4, a
 test("OR encode/decode", testEncodeDecode(OR, { layers: [2, 0, { neurons: 4, activator: "sigmoid" }, 0, { neurons: 4, activator: "relu" }, 1] }))
 test("AND encode/decode", testEncodeDecode(AND, { layers: [2, 0, { neurons: 4, activator: "sigmoid" }, 0, { neurons: 4, activator: "relu" }, 1] }))
 test("RAND encode/decode", testEncodeDecode(RAND, { layers: [2, 0, { neurons: 4, activator: "sigmoid" }, 0, { neurons: 4, activator: "relu" }, 1] }))
+
+console.table(tests)

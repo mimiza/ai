@@ -7,10 +7,10 @@ class Neuron {
         this[">"] = config[">"] || config.outputs || [] // Outcoming connections.
         this.a = config.a || config.activator // Activator, replace layer/network activator.
         this.b = !isNaN(config.b) ? Number(config.b) : !isNaN(config.bias) ? Number(config.bias) : random(-1, 1) // Bias. Make sure 0 is also be assigned.
-        this.o = 0 // Output.
+        this.i = config.i || config.input || 0 // Input.
+        this.o = config.o || config.output || 0 // Output.
         this.e = config.e || config.error || 0 // Error, used in backpropagation.
         this.d = config.d || config.delta || 0 // Delta, used in backpropagation.
-        this.i = config.i || config.iterations || 0 // Iterations, used in NEAT network.
         this.s = config.s || config.state || true // State, used in NEAT network, true for ACTIVE, and false for INACTIVE.
     }
 
@@ -46,7 +46,12 @@ class Neuron {
     }
 
     get input() {
-        return this.inputs.reduce((value, connection) => (value += connection.weight * connection.from.output), 0) + this.bias
+        return this.inputs.reduce((value, connection) => (value += connection.weight * connection.from.output), 0) || this.i
+    }
+
+    set input(value) {
+        this.i = value
+        return this.i
     }
 
     get output() {
@@ -74,15 +79,6 @@ class Neuron {
     set delta(value) {
         this.d = value
         return this.d
-    }
-
-    get iterations() {
-        return this.i
-    }
-
-    set iterations(value) {
-        this.i = value
-        return this.i
     }
 
     get state() {

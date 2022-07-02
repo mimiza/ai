@@ -93,11 +93,11 @@ class Network {
     }
 
     get input() {
-        return this.layers[0].neurons.map(neuron => neuron.output)
+        return this.layers[0].neurons.map(neuron => neuron.input)
     }
 
     set input(input = []) {
-        this.layers[0].neurons.forEach((neuron, index) => (neuron.output = input[index]))
+        this.layers[0].neurons.forEach((neuron, index) => (neuron.input = input[index]))
         return this.input
     }
 
@@ -194,11 +194,12 @@ class Network {
 
     propagate() {
         this.layers.forEach((layer, index) => {
-            if (index === 0) return
+            // if (index === 0) return
             layer.neurons.forEach(neuron => {
-                // Multiply weights and outputs, then summarize all together.
                 const activator = neuron.activator || layer.activator || this.activator
-                neuron.output = this.activate(neuron.input, activator)
+                if (index === 0) return (neuron.output = neuron.input)
+                // Multiply weights and outputs, then summarize all together.
+                neuron.output = this.activate(neuron.input + neuron.bias, activator)
             })
         })
         // Return the output layer.
