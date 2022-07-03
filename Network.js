@@ -123,7 +123,7 @@ class Network {
         }
         const layer = new Layer(config)
         if (layer) {
-            this.layers.push(layer)
+            this.l.push(layer) // Add new layer to array of layers.
             const neurons = config.n || config.neurons || config
             if (Number.isInteger(neurons)) for (let i = 0; i < neurons; i++) this.neuron({ layer })
         }
@@ -138,9 +138,9 @@ class Network {
         if (neuron) {
             if (config.layer) {
                 if (!isNaN(config.layer)) config.layer = this.layers[config.layer]
-                config.layer.neurons.push(neuron)
+                config.layer.n.push(neuron)
             }
-            this.neurons.push(neuron)
+            this.n.push(neuron)
             return neuron
         }
     }
@@ -161,7 +161,7 @@ class Network {
         // If FROM and TO are neurons.
         if (from.outputs && to.inputs) {
             const connection = new Connection(config)
-            return this.connections.push(connection)
+            return this.c.push(connection)
         }
 
         // If FROM and TO are layers.

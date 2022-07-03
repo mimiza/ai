@@ -5,7 +5,7 @@ class Layer {
     }
 
     get neurons() {
-        return this.n
+        return this.n.filter(n => n.state)
     }
 
     set neurons(value) {

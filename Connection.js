@@ -6,8 +6,8 @@ class Connection {
         this.c = config.c || config.change || 0
         this.s = config.s || config.state || true // State, used in NEAT network, true for ACTIVE, and false for INACTIVE.
         if (!this["<"] || !this[">"]) return undefined
-        this.from?.outputs.push(this)
-        this.to?.inputs.push(this)
+        this["<"]?.[">"].push(this)
+        this[">"]?.["<"].push(this)
     }
 
     get from() {
