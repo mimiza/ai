@@ -19,7 +19,7 @@ class Neuron {
     }
 
     get inputs() {
-        return this["<"].filter(c => c.state)
+        return this["<"].filter(c => c.state && c.from.state)
     }
 
     set inputs(value) {
@@ -28,7 +28,7 @@ class Neuron {
     }
 
     get outputs() {
-        return this[">"].filter(c => c.state)
+        return this[">"].filter(c => c.state && c.to.state)
     }
 
     set outputs(value) {

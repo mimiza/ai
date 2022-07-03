@@ -9,7 +9,7 @@ const XOR = [
 ]
 
 let generation = 0
-const size = 20
+const size = 50
 let creatures = []
 
 for (let i = 0; i < size; i++) {
@@ -24,17 +24,24 @@ const evolve = (data, config = {}) => {
         const error = data.map(item => item.output[0] - creature.calculate(item.input)[0]).reduce((value, item) => (value += Math.abs(item)), 0) / data.length
         // Calculate fitness using error. Greater is better.
         creature.fitness = 1 - error
+        creature.error = error
     })
     const ecosystem = new Ecosystem({ population: creatures, size })
     const best = ecosystem.best()
-    console.log("GENERATION", generation, "POPULATION", ecosystem.population.length, "FITNESS", ecosystem.averageFitness(), "BEST", best.fitness, best.neurons.length, best.connections.length)
     // If goal is achieved, return the best individual.
     if (ecosystem.averageFitness() >= 0.9) return ecosystem.best()
     // If goal is not achieved, continue the circle of life.
     ecosystem.speciate()
     ecosystem.generate()
+    console.clear()
+    console.log(`GENERATION: ${generation}
+POPULATION: ${ecosystem.population.length}
+SPECIES: ${ecosystem.species.length}
+FITNESS: ${ecosystem.averageFitness()}
+BEST FIT: ${best.fitness} - ERROR ${best.error} - NEURONS ${best.n.length} - CONNECTIONS: ${best.c.length}
+TEST XOR: ${data.map(item => best.calculate(item.input))}`)
     creatures = [...ecosystem.population]
-    return evolve(data, config)
+    setTimeout(() => evolve(data, config), 0)
 }
 
 const testXOR = evolve(XOR)

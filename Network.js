@@ -93,16 +93,16 @@ class Network {
     }
 
     get input() {
-        return this.layers[0].neurons.map(neuron => neuron.input)
+        return this.layers[0].n.map(neuron => neuron.input)
     }
 
     set input(input = []) {
-        this.layers[0].neurons.forEach((neuron, index) => (neuron.input = input[index]))
+        this.layers[0].n.forEach((neuron, index) => (neuron.input = input[index]))
         return this.input
     }
 
     get output() {
-        return [...this.layers].pop().neurons.map(neuron => neuron.output)
+        return [...this.layers].pop().n.map(neuron => neuron.output)
     }
 
     initialize(config = {}) {
@@ -159,7 +159,7 @@ class Network {
         const to = config[">"] || config.to || {}
 
         // If FROM and TO are neurons.
-        if (from.outputs && to.inputs) {
+        if (from.outputs && to.inputs && !this.connections.some(c => c.from.id === from.id && c.to.id === to.id)) {
             const connection = new Connection(config)
             return this.c.push(connection)
         }
@@ -193,15 +193,23 @@ class Network {
     }
 
     propagate() {
-        this.layers.forEach((layer, index) => {
-            // if (index === 0) return
-            layer.neurons.forEach(neuron => {
-                const activator = neuron.activator || layer.activator || this.activator
-                if (index === 0) return (neuron.output = neuron.input)
-                // Multiply weights and outputs, then summarize all together.
-                neuron.output = this.activate(neuron.input + neuron.bias, activator)
+        const activated = []
+        let end = false
+        while (end === false) {
+            end = true
+            this.layers.forEach((layer, index) => {
+                // if (index === 0) return
+                layer.neurons.forEach(neuron => {
+                    activated.push(neuron.id)
+                    const activator = neuron.activator || layer.activator || this.activator
+                    if (index === 0 && neuron.inputs.length === 0) return (neuron.output = neuron.input)
+                    // Multiply weights and outputs, then summarize all together.
+                    neuron.output = this.activate(neuron.input + neuron.bias, activator)
+                    // Loop until all neurons and their input neurons are activated.
+                    if (neuron.inputs.some(c => !activated.includes(c.from.id))) end = false
+                })
             })
-        })
+        }
         // Return the output layer.
         return this.output
     }
@@ -239,37 +247,37 @@ class Network {
         const activators = ["sigmoid", "relu", "tanh"]
 
         // Add new random neuron.
-        if (Math.random() <= 0.001) this.neuron({ layer: 1, activator: random(activators) })
-
-        this.neurons.forEach(neuron => {
-            // Change random neuron biases.
-            if (Math.random() <= 0.1) neuron.bias += neuron.bias * 0.01 * random([-1, 1])
-            // Disable random neuron.
-            if (Math.random() <= 0.001) neuron.state = random([true, false])
-        })
-
-        this.connections.forEach(connection => {
-            // Change random connection weight.
-            if (Math.random() <= 0.1) connection.weight += connection.weight * 0.01 * random([-1, 1])
-            // Disable random connections.
-            if (Math.random() <= 0.001) connection.state = random([true, false])
-        })
+        if (Math.random() < 0.001) this.neuron({ layer: 1, activator: random(activators) })
 
         // Add new random connection.
-        if (Math.random() <= 0.01) {
+        if (Math.random() < 0.01) {
             const from = random(this.neurons)
             const to = random(this.neurons)
             if (!this.connections.some(c => c.from.id === from.id && c.to.id === to.id)) this.connect({ from, to })
         }
 
         // Add new random node between a connection.
-        if (Math.random() <= 0.001 && this.connections.length) {
+        if (Math.random() < 0.001 && this.connections.length) {
             const connection = random(this.connections.filter(connection => connection.state))
             const neuron = this.neuron({ layer: 1, activator: random(activators) })
             connection.state = false
             this.connect({ from: connection.from, to: neuron.id })
             this.connect({ from: neuron.id, to: connection.to })
         }
+
+        this.neurons.forEach(neuron => {
+            // Change random neuron biases.
+            if (Math.random() < 0.1) neuron.bias += neuron.bias * 0.01 * random([-1, 1])
+            // Enable/disable random neuron.
+            if (Math.random() < 0.001 && ![...this.layers[0].n, ...this.layers[this.layers.length - 1].n].some(n => n.id === neuron.id)) neuron.state = random([true, false])
+        })
+
+        this.connections.forEach(connection => {
+            // Change random connection weight.
+            if (Math.random() < 1) connection.weight += connection.weight * 0.01 * random([-1, 1])
+            // Enable/disable random connections.
+            if (Math.random() < 0.001) connection.state = random([true, false])
+        })
     }
 
     sigmoid(x = 0) {

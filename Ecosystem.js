@@ -8,7 +8,7 @@ class Ecosystem {
         // Coefficients for compatibility calculation.
         this.edc = config.edc || config.excessDisjointCoefficient || 1 // Excess and disjoint coefficient.
         this.wdc = config.wdc || config.weightDifferenceCoefficient || 0.5 // Weight difference coefficient.
-        this.compatibility = config.compatibility || 3 // Compatibility threshold.
+        this.compatibility = config.compatibility || 0.2 // Compatibility threshold.
     }
 
     best(population = this.population) {
@@ -119,6 +119,7 @@ class Ecosystem {
         // This should be fixed. Species is just a standalone array.
         generation.forEach(item => this.population.splice(Math.floor(Math.random() * this.population.length), 1))
         generation.forEach(item => this.population.push(item))
+        while (this.size < this.population.length) this.population.splice(Math.floor(Math.random() * this.population.length), 1)
     }
 }
 

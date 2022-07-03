@@ -47,6 +47,7 @@ class Connection {
     }
 
     get state() {
+        if (!this.from.state || !this.to.state) return false
         return this.s
     }
 

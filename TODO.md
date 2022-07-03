@@ -6,4 +6,8 @@ NEAT algo
         -   sum the input
     -   for all non-sensor and active nodes
         -   calculate the output
--   Why is the system getting slower?
+-   These need to be fixed:
+    -   Network.mutate()
+    -   Ecosystem.speciate()
+    -   Ecosystem.generate()
+-   Why NEAT XOR best fit is always 6.25?
