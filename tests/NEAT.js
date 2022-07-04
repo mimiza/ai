@@ -8,16 +8,37 @@ const XOR = [
     { input: [1, 1], output: [0] }
 ]
 
+const AND = [
+    { input: [0, 1], output: [0] },
+    { input: [1, 0], output: [0] },
+    { input: [0, 0], output: [0] },
+    { input: [1, 1], output: [1] }
+]
+
+const OR = [
+    { input: [0, 1], output: [1] },
+    { input: [1, 0], output: [1] },
+    { input: [0, 0], output: [0] },
+    { input: [1, 1], output: [1] }
+]
+
+const RAND = [
+    { input: [0, 1], output: [0] },
+    { input: [1, 0], output: [1] },
+    { input: [0, 0], output: [1] },
+    { input: [1, 1], output: [0] }
+]
+
 let generation = 0
-const size = 50
+const size = 100
 let creatures = []
 
 for (let i = 0; i < size; i++) {
-    const creature = new Network({ layers: [2, 0, 1] })
+    const creature = new Network({ layers: [2, 1, 1] })
     creatures.push(creature)
 }
 
-const evolve = (data, config = {}) => {
+const evolve = async (data, config = {}) => {
     generation++
     creatures.forEach(creature => {
         // Do exams to get error. Error indicates how far we are to the goal. Smaller is better.
@@ -29,7 +50,7 @@ const evolve = (data, config = {}) => {
     const ecosystem = new Ecosystem({ population: creatures, size })
     const best = ecosystem.best()
     // If goal is achieved, return the best individual.
-    if (ecosystem.averageFitness() >= 0.9) return ecosystem.best()
+    if (ecosystem.averageFitness() >= 0.9) return console.log(best.encode())
     // If goal is not achieved, continue the circle of life.
     ecosystem.speciate()
     ecosystem.generate()
@@ -38,12 +59,13 @@ const evolve = (data, config = {}) => {
 POPULATION: ${ecosystem.population.length}
 SPECIES: ${ecosystem.species.length}
 FITNESS: ${ecosystem.averageFitness()}
-BEST FIT: ${best.fitness} - ERROR ${best.error} - NEURONS ${best.n.length} - CONNECTIONS: ${best.c.length}
-TEST XOR: ${data.map(item => best.calculate(item.input))}`)
+BEST FIT: ${best.fitness} - ERROR: ${best.error} - NEURONS: ${best.n.length} - CONNECTIONS: ${best.c.length}
+TEST RESULT: ${data.map(item => best.calculate(item.input))}`)
     creatures = [...ecosystem.population]
-    setTimeout(() => evolve(data, config), 0)
+    setTimeout(async () => await evolve(data, config), 0)
 }
 
-const testXOR = evolve(XOR)
-
-console.log("XOR", testXOR)
+console.log("XOR", evolve(XOR))
+// console.log("AND", evolve(AND))
+// console.log("OR", evolve(OR))
+// console.log("RAND", evolve(RAND))

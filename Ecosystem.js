@@ -40,7 +40,7 @@ class Ecosystem {
     speciate(population = this.population) {
         population.forEach(individual => {
             let speciated = false
-            for (const species of this.species) {
+            for (const species of this.species)
                 if (species.length) {
                     // Choose a random representative sample from the species.
                     const sample = species[Math.floor(Math.random() * species.length)]
@@ -51,7 +51,6 @@ class Ecosystem {
                         break
                     }
                 }
-            }
             // If no species found, create a new species for this individual.
             if (!speciated) this.species.push([individual])
         })
@@ -81,15 +80,15 @@ class Ecosystem {
         // Get genes from the rest parents and merge into the child.
         parents.forEach(parent => {
             // Copy none object properties.
-            for (const key in parent) if (typeof child[key] === "undefined" && typeof parent[key] !== "object") child[key] = parent[key]
+            for (const key in parent) if (!Object.keys(child).includes(key) && typeof parent[key] !== "object") child[key] = parent[key]
             // Copy hidden layer's neurons.
             const hidden = parent.l[1].n || parent.l[1]
             hidden.forEach(N1 => {
-                if (!child.layers[1].neurons.some(N2 => N1 === N2["#"])) child.neuron({ layer: 1, ...N1 })
+                if (!child.layers[1].n.some(N2 => N1 === N2["#"])) child.neuron({ layer: 1, ...N1 })
             })
             // Copy connections.
             parent.c.forEach(C1 => {
-                if (!child.connections.some(C2 => C1["<"] === C2["<"]["#"] && C1[">"] === C2[">"]["#"])) child.connect(C1)
+                if (!child.c.some(C2 => C1["<"] === C2["<"]["#"] && C1[">"] === C2[">"]["#"])) child.connect(C1)
             })
         })
         return child
