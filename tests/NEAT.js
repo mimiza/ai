@@ -58,9 +58,9 @@ const evolve = async (data, config = {}) => {
     console.log(`GENERATION: ${generation}
 POPULATION: ${ecosystem.population.length}
 SPECIES: ${ecosystem.species.length}
-FITNESS: ${ecosystem.averageFitness()}
-BEST FIT: ${best.fitness} - ERROR: ${best.error} - NEURONS: ${best.n.length} - CONNECTIONS: ${best.c.length}
-TEST RESULT: ${data.map(item => best.calculate(item.input))}`)
+FITNESS: ${ecosystem.averageFitness().toFixed(3)}
+BEST FIT: ${best.fitness.toFixed(3)} - ERROR: ${best.error.toFixed(3)} - NEURONS: ${best.n.length} - CONNECTIONS: ${best.c.length}
+TEST RESULT: ${data.map(item => best.calculate(item.input)[0].toFixed(3))}`)
     creatures = [...ecosystem.population]
     setTimeout(async () => await evolve(data, config), 0)
 }

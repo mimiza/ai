@@ -38,6 +38,7 @@ class Ecosystem {
     }
 
     speciate(population = this.population) {
+        this.species = []
         population.forEach(individual => {
             let speciated = false
             for (const species of this.species)
