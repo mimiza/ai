@@ -177,8 +177,7 @@ class Network {
     }
 
     train(input = [], output = []) {
-        this.input = input
-        this.propagate()
+        this.calculate(input)
         this.backpropagate(output)
         this.iterations++
     }

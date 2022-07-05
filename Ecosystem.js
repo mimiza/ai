@@ -8,7 +8,7 @@ class Ecosystem {
         // Coefficients for compatibility calculation.
         this.edc = config.edc || config.excessDisjointCoefficient || 1 // Excess and disjoint coefficient.
         this.wdc = config.wdc || config.weightDifferenceCoefficient || 0.5 // Weight difference coefficient.
-        this.compatibility = config.compatibility || 0.2 // Compatibility threshold.
+        this.compatibility = config.compatibility || 0.1 // Compatibility threshold.
     }
 
     best(population = this.population) {
@@ -86,10 +86,13 @@ class Ecosystem {
             const hidden = parent.l[1].n || parent.l[1]
             hidden.forEach(N1 => {
                 if (!child.layers[1].n.some(N2 => N1 === N2["#"])) child.neuron({ layer: 1, ...N1 })
+                else if (Math.random() < 0.5 && child.neurons[N1["#"]]) child.neurons[N1["#"]] = { ...child.neurons[N1["#"]], ...N1 }
             })
             // Copy connections.
             parent.c.forEach(C1 => {
-                if (!child.c.some(C2 => C1["<"] === C2["<"]["#"] && C1[">"] === C2[">"]["#"])) child.connect(C1)
+                const connection = child.c.find(C2 => C1["<"] === C2["<"]["#"] && C1[">"] === C2[">"]["#"])
+                if (!connection) child.connect(C1)
+                else if (Math.random() > 0.5 && connection) connection.w = C1.w
             })
         })
         return child

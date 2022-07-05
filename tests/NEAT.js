@@ -34,13 +34,14 @@ const size = 100
 let creatures = []
 
 for (let i = 0; i < size; i++) {
-    const creature = new Network({ layers: [2, 1, 1] })
+    const creature = new Network({ layers: [2, 0, 1] })
     creatures.push(creature)
 }
 
 const evolve = async (data, config = {}) => {
     generation++
     creatures.forEach(creature => {
+        // for (let i = 0; i < 20; i++) data.forEach(d => creature.train(d.input, d.output))
         // Do exams to get error. Error indicates how far we are to the goal. Smaller is better.
         const error = data.map(item => item.output[0] - creature.calculate(item.input)[0]).reduce((value, item) => (value += Math.abs(item)), 0) / data.length
         // Calculate fitness using error. Greater is better.
