@@ -194,15 +194,18 @@ class Network {
 
     propagate() {
         const activated = []
+        let loop = true
         // Loop until all neurons and their input neurons are activated.
-        while (this.neurons.filter(n => n.state).some(neuron => neuron.inputs.some(c => !activated.includes(c.from.id)))) {
+        while (loop === true) {
+            loop = false
             this.layers.forEach((layer, index) =>
                 layer.neurons.forEach(neuron => {
-                    activated.push(neuron.id)
                     const activator = neuron.activator || layer.activator || this.activator
-                    if (index === 0 && neuron.inputs.length === 0) return (neuron.output = neuron.input)
-                    // Multiply weights and outputs, then summarize all together.
-                    neuron.output = this.activate(neuron.input + neuron.bias, activator)
+                    if (index === 0 && neuron.inputs.length === 0) neuron.output = neuron.input
+                    // Multiply weights and outputs, summarize all inputs, then activate.
+                    else neuron.output = this.activate(neuron.input + neuron.bias, activator)
+                    if (neuron.inputs.some(connection => !activated.includes(connection.from.id))) loop = true
+                    activated.push(neuron.id)
                 })
             )
         }
