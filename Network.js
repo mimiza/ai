@@ -181,8 +181,16 @@ class Network {
         this.backpropagate(output)
         this.iterations++
     }
+    
+    clear() {
+        this.neurons.forEach(neuron => {
+            neuron.input = 0
+            neuron.output = undefined
+        })
+    }
 
     calculate(input = []) {
+        this.clear()
         this.input = input
         return this.propagate()
     }
@@ -200,7 +208,7 @@ class Network {
             this.layers.forEach((layer, index) =>
                 layer.neurons.forEach(neuron => {
                     const activator = neuron.activator || layer.activator || this.activator
-                    if (index === 0 && neuron.inputs.length === 0) neuron.output = neuron.input
+                    if (index === 0 && !neuron.inputs.length) neuron.output = neuron.input
                     // Multiply weights and outputs, summarize all inputs, then activate.
                     else neuron.output = this.activate(neuron.input + neuron.bias, activator)
                     if (neuron.inputs.some(connection => !activated.includes(connection.from.id))) loop = true
