@@ -181,7 +181,7 @@ class Network {
         this.backpropagate(output)
         this.iterations++
     }
-    
+
     clear() {
         this.neurons.forEach(neuron => {
             neuron.input = 0
@@ -273,14 +273,14 @@ class Network {
 
         this.neurons.forEach(neuron => {
             // Change random neuron biases.
-            if (Math.random() < 0.1) neuron.bias += neuron.bias * 0.01 * random([-1, 1])
+            if (Math.random() < 0.1) neuron.bias += neuron.bias * random(0.01, 0.2) * random([-1, 1])
             // Enable/disable random neuron.
             if (Math.random() < 0.001 && ![...this.layers[0].n, ...this.layers[this.layers.length - 1].n].some(n => n.id === neuron.id)) neuron.state = random([true, false])
         })
 
         this.connections.forEach(connection => {
             // Change random connection weight.
-            if (Math.random() < 1) connection.weight += connection.weight * 0.01 * random([-1, 1])
+            if (Math.random() < 0.1) connection.weight += connection.weight * random(0.01, 0.2) * random([-1, 1])
             // Enable/disable random connections.
             if (Math.random() < 0.001) connection.state = random([true, false])
         })

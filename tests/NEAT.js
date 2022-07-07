@@ -55,6 +55,7 @@ const evolve = async (data, config = {}) => {
     // If goal is not achieved, continue the circle of life.
     ecosystem.speciate()
     ecosystem.generate()
+    ecosystem.population.forEach(individual => (individual.fitness = 0))
     console.clear()
     console.log(`GENERATION: ${generation}
 POPULATION: ${ecosystem.population.length}
