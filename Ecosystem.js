@@ -80,7 +80,7 @@ class Ecosystem {
         const child = new Network(parents.shift())
         // Get genes from the rest parents and merge into the child.
         parents.forEach(parent => {
-            // Copy none object properties.
+            // Copy non-objective properties.
             for (const key in parent) if (!Object.keys(child).includes(key) && typeof parent[key] !== "object") child[key] = parent[key]
             // Copy hidden layer's neurons.
             const hidden = parent.l[1].n || parent.l[1]

@@ -334,7 +334,7 @@ class Network {
         }
         // Reset network layers, neurons, connections.
         this.initialize()
-        // Restore none object properties.
+        // Restore non-objective properties.
         for (const key in data) if (typeof data[key] !== "object") this[key] = data[key]
         // Restore network neurons.
         data.n.forEach(item => this.neuron({ ...item }))
