@@ -137,6 +137,7 @@ class Network {
         const neuron = new Neuron(config)
         if (neuron) {
             if (config.layer) {
+                console.log("LAYER", config.layer)
                 if (!isNaN(config.layer)) config.layer = this.layers[config.layer]
                 config.layer.n.push(neuron)
             }
@@ -251,9 +252,21 @@ class Network {
 
     mutate() {
         const activators = ["sigmoid", "relu", "tanh"]
+        
+        // Add new random layer.
+        if (Math.random() < 0.01) {
+            const layer = new Layer()
+            this.l.splice(random(1, this.layers.length - 2), 0, layer)
+            console.log(this.layers)
+            //process.exit()
+        }
 
         // Add new random neuron.
-        if (Math.random() < 0.001) this.neuron({ layer: 1, activator: random(activators) })
+        if (Math.random() < 0.001) {
+            const l = random(1, this.layers.length - 2)
+            console.log("LLL",l,this.layers.length - 2)
+            this.neuron({ layer: l, activator: random(activators) })
+        }
 
         // Add new random connection.
         if (Math.random() < 0.01) {
@@ -265,7 +278,7 @@ class Network {
         // Add new random node between a connection.
         if (Math.random() < 0.001 && this.connections.length) {
             const connection = random(this.connections.filter(connection => connection.state))
-            const neuron = this.neuron({ layer: 1, activator: random(activators) })
+            const neuron = this.neuron({ layer: random(1, this.layers.length - 2), activator: random(activators) })
             connection.state = false
             this.connect({ from: connection.from, to: neuron.id })
             this.connect({ from: neuron.id, to: connection.to })

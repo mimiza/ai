@@ -4,9 +4,10 @@ export const uid = () => {
 
 export const random = (...input) => {
     if (Array.isArray(input[0])) return input[0][Math.floor(Math.random() * input[0].length)]
-    if (input.length === 2 && input.every(i => typeof i === "number") && input[0] < input[1]) {
-        const min = input[0]
-        const max = input[1]
+    if (input.length === 2 && input.every(i => typeof i === "number")) {
+        const min = Math.min(...input)
+        const max = Math.max(...input)
+        if (min === max) return min
         return Math.round(Math.random() * (max - min)) - Math.abs(min)
     }
 }

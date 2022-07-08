@@ -148,7 +148,7 @@ class Ecosystem {
                 })
             // Put the neuron to the first layer, or the last layer, or a random layer between the first and the last layers.
             const index = indexes.includes(0) ? 0 : indexes.includes(child.l.length - 1) ? child.l.length - 1 : random(indexes)
-            const layer = child.l[index].n || child.l[index]
+            const layer = child.l[index]?.n || child.l[index]
             layer.push(neuron["#"])
         })
 
@@ -160,9 +160,9 @@ class Ecosystem {
         // Calculate average fitness of the entire population.
         const populationFitness = this.averageFitness()
         const sizes = this.species.map(species => Math.ceil((this.averageFitness(species) / populationFitness) * species.length))
-        const total = sizes.reduce((value, size) => value += size, 0)
+        const total = sizes.reduce((value, size) => (value += size), 0)
         this.species.forEach((species, index) => {
-            const size = sizes[index] * this.size / total
+            const size = (sizes[index] * this.size) / total
             for (let i = 0; i < size; i++) {
                 // Select parents and crossover.
                 const father = this.select(species)

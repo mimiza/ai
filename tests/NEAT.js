@@ -55,7 +55,7 @@ const evolve = async (data, config = {}) => {
     // If goal is not achieved, continue the circle of life.
     ecosystem.speciate()
     ecosystem.generate()
-    console.clear()
+    // console.clear()
     console.log(`GENERATION: ${generation}
 POPULATION: ${ecosystem.population.length}
 SPECIES: ${ecosystem.species.length}
