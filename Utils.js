@@ -8,7 +8,7 @@ export const random = (...input) => {
         const min = Math.min(...input)
         const max = Math.max(...input)
         if (min === max) return min
-        return Math.round(Math.random() * (max - min)) - Math.abs(min)
+        return Math.round(Math.random() * (max - min)) + min
     }
 }
 

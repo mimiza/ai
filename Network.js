@@ -137,7 +137,6 @@ class Network {
         const neuron = new Neuron(config)
         if (neuron) {
             if (config.layer) {
-                console.log("LAYER", config.layer)
                 if (!isNaN(config.layer)) config.layer = this.layers[config.layer]
                 config.layer.n.push(neuron)
             }
@@ -252,21 +251,12 @@ class Network {
 
     mutate() {
         const activators = ["sigmoid", "relu", "tanh"]
-        
+
         // Add new random layer.
-        if (Math.random() < 0.01) {
-            const layer = new Layer()
-            this.l.splice(random(1, this.layers.length - 2), 0, layer)
-            console.log(this.layers)
-            //process.exit()
-        }
+        if (Math.random() < 0.001 && !this.layers.filter(l => !l.n.length).length) this.l.splice(random(1, this.layers.length - 2), 0, new Layer())
 
         // Add new random neuron.
-        if (Math.random() < 0.001) {
-            const l = random(1, this.layers.length - 2)
-            console.log("LLL",l,this.layers.length - 2)
-            this.neuron({ layer: l, activator: random(activators) })
-        }
+        if (Math.random() < 0.01) this.neuron({ layer: random(1, this.layers.length - 2), activator: random(activators) })
 
         // Add new random connection.
         if (Math.random() < 0.01) {
@@ -276,7 +266,7 @@ class Network {
         }
 
         // Add new random node between a connection.
-        if (Math.random() < 0.001 && this.connections.length) {
+        if (Math.random() < 0.01 && this.connections.length) {
             const connection = random(this.connections.filter(connection => connection.state))
             const neuron = this.neuron({ layer: random(1, this.layers.length - 2), activator: random(activators) })
             connection.state = false
@@ -293,7 +283,7 @@ class Network {
 
         this.connections.forEach(connection => {
             // Change random connection weight.
-            if (Math.random() < 0.1) connection.weight += connection.weight * random(0.01, 0.2) * random([-1, 1])
+            if (Math.random() < 1) connection.weight += connection.weight * random(0.01, 0.5) * random([-1, 1])
             // Enable/disable random connections.
             if (Math.random() < 0.001) connection.state = random([true, false])
         })

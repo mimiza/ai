@@ -55,12 +55,12 @@ const evolve = async (data, config = {}) => {
     // If goal is not achieved, continue the circle of life.
     ecosystem.speciate()
     ecosystem.generate()
-    // console.clear()
+    console.clear()
     console.log(`GENERATION: ${generation}
 POPULATION: ${ecosystem.population.length}
 SPECIES: ${ecosystem.species.length}
 FITNESS: ${ecosystem.averageFitness().toFixed(3)}
-BEST FIT: ${best.fitness.toFixed(3)} - ERROR: ${best.error.toFixed(3)} - NEURONS: ${best.n.length} - CONNECTIONS: ${best.c.length}
+BEST FIT: ${best.fitness.toFixed(3)} - ERROR: ${best.error.toFixed(3)} - LAYERS: ${best.layers.length} - NEURONS: ${best.n.length} - CONNECTIONS: ${best.c.length}
 TEST RESULT: ${data.map(item => best.calculate(item.input)[0].toFixed(3))}`)
     // Reset fitnesses.
     ecosystem.population.forEach(individual => (individual.fitness = 0))
