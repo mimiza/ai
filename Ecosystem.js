@@ -59,12 +59,12 @@ class Ecosystem {
         return this.species
     }
 
-    select(species) {
-        const sorted = [...species].sort((a, b) => b.fitness - a.fitness)
+    select(species = []) {
+        species.sort((a, b) => b.fitness - a.fitness)
         const seed = Math.random()
-        if (seed < 0.25) return sorted[0]
-        if (seed < 0.375 && species.length > 1) return sorted[1]
-        if (seed < 0.5 && species.length > 2) return sorted[2]
+        if (seed < 0.25) return species[0]
+        if (seed < 0.375 && species.length > 1) return species[1]
+        if (seed < 0.5 && species.length > 2) return species[2]
         const threshold = Math.random() * species.reduce((value, individual) => (value += individual.fitness), 0)
         let sum = 0
         return species.find(individual => {
@@ -156,17 +156,14 @@ class Ecosystem {
     }
 
     generate() {
-        // THIS NEEDS TO BE FIXED!
+        const generation = []
         // Calculate average fitness of the entire population.
         const populationFitness = this.averageFitness()
-        const generation = []
-        this.species.forEach(species => {
-            // Sort individuals by fitness.
-            species.sort((a, b) => b.fitness - a.fitness)
-            // Calculate average fitness of each individual in the species.
-            const speciesFitness = this.averageFitness(species)
-            const speciesSize = Math.ceil((speciesFitness / populationFitness) * species.length)
-            for (let i = 0; i < speciesSize; i++) {
+        const sizes = this.species.map(species => Math.ceil((this.averageFitness(species) / populationFitness) * species.length))
+        const total = sizes.reduce((value, size) => value += size, 0)
+        this.species.forEach((species, index) => {
+            const size = sizes[index] * this.size / total
+            for (let i = 0; i < size; i++) {
                 // Select parents and crossover.
                 const father = this.select(species)
                 const mother = this.select(species)
@@ -175,10 +172,7 @@ class Ecosystem {
                 generation.push(child)
             }
         })
-        // Kill the old individuals on the bottom half of the species to save computing energy.
-        // This should be fixed. Species is just a standalone array.
-        generation.forEach(item => this.population.splice(Math.floor(Math.random() * this.population.length), 1))
-        generation.forEach(item => this.population.push(item))
+        this.population = generation
         while (this.size < this.population.length) this.population.splice(Math.floor(Math.random() * this.population.length), 1)
     }
 }
