@@ -1,4 +1,5 @@
 import Network from "./Network.js"
+import { random } from "./Utils.js"
 
 class Ecosystem {
     constructor(config = {}) {
@@ -72,30 +73,86 @@ class Ecosystem {
         })
     }
 
+    // crossover(...parents) {
+    //     if (!parents.length || parents.some(parent => typeof parent !== "object")) return
+    //     // Sort parents by fitness.
+    //     parents = parents.sort((a, b) => b.fitness - a.fitness).map(parent => parent.encode())
+    //     // Child looks more like the parent who performs better.
+    //     const child = new Network(parents.shift())
+    //     // Get genes from the rest parents and merge into the child.
+    //     parents.forEach(parent => {
+    //         // Copy non-objective properties.
+    //         for (const key in parent) if (!Object.keys(child).includes(key) && typeof parent[key] !== "object") child[key] = parent[key]
+    //         // Copy hidden layer's neurons.
+    //         const hidden = parent.l[1].n || parent.l[1]
+    //         hidden.forEach(N1 => {
+    //             if (!child.layers[1].n.some(N2 => N1 === N2["#"])) child.neuron({ layer: 1, ...N1 })
+    //             else if (Math.random() < 0.5 && child.neurons[N1["#"]]) child.neurons[N1["#"]] = { ...child.neurons[N1["#"]], ...N1 }
+    //         })
+    //         // Copy connections.
+    //         parent.c.forEach(C1 => {
+    //             const connection = child.c.find(C2 => C1["<"] === C2["<"]["#"] && C1[">"] === C2[">"]["#"])
+    //             if (!connection) child.connect(C1)
+    //             else if (Math.random() > 0.5 && connection) connection.w = C1.w
+    //         })
+    //     })
+    //     return child
+    // }
+
     crossover(...parents) {
         if (!parents.length || parents.some(parent => typeof parent !== "object")) return
-        // Sort parents by fitness.
-        parents = parents.sort((a, b) => b.fitness - a.fitness).map(parent => parent.encode())
-        // Child looks more like the parent who performs better.
-        const child = new Network(parents.shift())
-        // Get genes from the rest parents and merge into the child.
+
+        parents = parents.map(parent => parent.encode())
+
+        const child = { l: [], n: [], c: [] }
+
         parents.forEach(parent => {
             // Copy non-objective properties.
-            for (const key in parent) if (!Object.keys(child).includes(key) && typeof parent[key] !== "object") child[key] = parent[key]
-            // Copy hidden layer's neurons.
-            const hidden = parent.l[1].n || parent.l[1]
-            hidden.forEach(N1 => {
-                if (!child.layers[1].n.some(N2 => N1 === N2["#"])) child.neuron({ layer: 1, ...N1 })
-                else if (Math.random() < 0.5 && child.neurons[N1["#"]]) child.neurons[N1["#"]] = { ...child.neurons[N1["#"]], ...N1 }
+            Object.keys(parent).forEach(key => {
+                const values = parents.filter(item => !["undefined", "object"].includes(typeof item[key]) && typeof child[key] === "undefined").map(item => item[key])
+                if (values.length) child[key] = random(values)
             })
-            // Copy connections.
-            parent.c.forEach(C1 => {
-                const connection = child.c.find(C2 => C1["<"] === C2["<"]["#"] && C1[">"] === C2[">"]["#"])
-                if (!connection) child.connect(C1)
-                else if (Math.random() > 0.5 && connection) connection.w = C1.w
+
+            parent.l.forEach((item, index) => {
+                // Get all layers that have the 'index' of 'layer' but don't exist in child.l.
+                const layers = parents.filter(item => typeof item.l[index] !== "undefined" && typeof child.l[index] === "undefined").map(item => item.l[index])
+                const layer = random(layers)
+                if (Array.isArray(layer)) child.l.push([])
+                else if (typeof layer === "object") child.l.push({ ...layer, n: [] })
+            })
+
+            parent.n.forEach(neuron => {
+                // Get all neurons that matches # of 'neuron' but don't exist in child.n.
+                const match = n => n["#"] === neuron["#"]
+                const neurons = parents.filter(item => item.n.some(match) && !child.n.some(match)).map(item => item.n.find(match))
+                if (neurons.length) child.n.push(random(neurons))
+            })
+
+            parent.c.forEach(connection => {
+                // Get all connections that matches '<' and '>' of 'connection' but don't exist in child.c.
+                const match = c => c["<"] === connection["<"] && c[">"] === connection[">"]
+                const connections = parents.filter(item => item.c.some(match) && !child.c.some(match)).map(item => item.c.find(match))
+                if (connections.length) child.c.push(random(connections))
             })
         })
-        return child
+
+        child.n.forEach(neuron => {
+            const indexes = parents
+                .filter(item => item.n.some(n => n["#"] === neuron["#"]))
+                .map(item => {
+                    const index = item.l.findIndex(l => l.includes(neuron["#"]))
+                    // Return the index of the last layer of child if this neuron belongs to the last layer of its network.
+                    if (index === item.l.length - 1) return child.l.length - 1
+                    // By default, return the normal index.
+                    return index
+                })
+            // Put the neuron to the first layer, or the last layer, or a random layer between the first and the last layers.
+            const index = indexes.includes(0) ? 0 : indexes.includes(child.l.length - 1) ? child.l.length - 1 : random(indexes)
+            const layer = child.l[index].n || child.l[index]
+            layer.push(neuron["#"])
+        })
+
+        return new Network(child)
     }
 
     generate() {
