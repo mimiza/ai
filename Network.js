@@ -233,7 +233,7 @@ class Network {
                         neuron.delta = error * neuron.output * (1 - neuron.output)
                         break
                     case "relu":
-                        neuron.delta = error * (neuron.output > 0 ? 1 : neuron.output < 0 ? 0 : undefined) || error
+                        neuron.delta = error * (neuron.output >= 0 ? 1 : 0)
                         break
                     case "tanh":
                         neuron.delta = error * (1 - Math.pow(Math.tanh(neuron.output), 2))

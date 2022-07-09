@@ -148,6 +148,7 @@ class Ecosystem {
         })
         this.population = generation
         while (this.size < this.population.length) this.population.splice(Math.floor(Math.random() * this.population.length), 1)
+        this.speciate()
     }
 }
 

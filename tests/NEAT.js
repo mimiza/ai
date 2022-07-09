@@ -38,7 +38,7 @@ for (let i = 0; i < size; i++) {
     creatures.push(creature)
 }
 
-const evolve = async (data, config = {}) => {
+const evolve = (data, config = {}) => {
     generation++
     creatures.forEach(creature => {
         // for (let i = 0; i < 20; i++) data.forEach(d => creature.train(d.input, d.output))
@@ -65,7 +65,7 @@ TEST RESULT: ${data.map(item => best.calculate(item.input)[0].toFixed(3))}`)
     // Reset fitnesses.
     ecosystem.population.forEach(individual => (individual.fitness = 0))
     creatures = [...ecosystem.population]
-    setTimeout(async () => await evolve(data, config), 0)
+    setTimeout(() => evolve(data, config), 0)
 }
 
 console.log("XOR", evolve(XOR))
