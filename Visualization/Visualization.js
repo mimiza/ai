@@ -12,21 +12,41 @@ const draw = (name, attributes) => {
     svg.appendChild(element)
 }
 
-const present = (topology = {}) => {
-    const width = svg.width.baseVal.value
-    const height = svg.height.baseVal.value
-    const layers = topology.l.map((layer, index) =>
-        Object.create({
-            // x: (width / topology.l.length) * index,
-            x: 0,
-            // width: width / topology.l.length,
-            width: 10,
-            // height,
-            height: 10,
-            stroke: 1
+const present = (data = {}) => {
+    const w = svg.width.baseVal.value
+    const h = svg.height.baseVal.value
+    const map = {}
+    data.l.forEach((layer, lindex) => {
+        const neurons = layer.n || layer
+        neurons.forEach((neuron, nindex) => {
+            const lw = w / data.l.length // Layer width.
+            const rh = h / neurons.length // Row height.
+            const r = lw * 0.2 // Neuron radius.
+            const x = lw * lindex + lw / 2
+            const y = rh * nindex + rh / 2
+            draw("circle", {
+                cx: x,
+                cy: y,
+                r,
+                "fill-opacity": 0,
+                stroke: "red",
+                "stroke-width": 2
+            })
+            map[neuron["#"]] = {x, y, r}
         })
-    )
-    layers.map(layer => draw("rect", layer))
+    })
+    data.c.forEach(connection => {
+        const x1 = map[connection.from].x + map[connection.from].r
+        const y1 = map[connection.from].y
+        const x2 = map[connection.to].x - map[connection.to].r
+        const y2 = map[connection.to].y
+        console.log(x1,y1,x2,y2)
+        draw("line", {
+            x1,y1,x2,y2,
+            stroke: "red",
+            "stroke-width": 2
+        })
+    })
 }
 
 present(network)
