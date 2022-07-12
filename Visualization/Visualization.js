@@ -32,7 +32,7 @@ const present = (data = {}) => {
                 stroke: "red",
                 "stroke-width": 2
             })
-            map[neuron["#"]] = {x, y, r}
+            map[neuron["#"]] = { x, y, r }
         })
     })
     data.c.forEach(connection => {
@@ -40,9 +40,11 @@ const present = (data = {}) => {
         const y1 = map[connection.from].y
         const x2 = map[connection.to].x - map[connection.to].r
         const y2 = map[connection.to].y
-        console.log(x1,y1,x2,y2)
         draw("line", {
-            x1,y1,x2,y2,
+            x1,
+            y1,
+            x2,
+            y2,
             stroke: "red",
             "stroke-width": 2
         })
