@@ -1,5 +1,10 @@
 import Ecosystem from "../Ecosystem.js"
 import Network from "../Network.js"
+import Visualization from "../Visualization.js"
+
+const svg = document.querySelector("#visualization")
+
+const visualization = new Visualization({ svg })
 
 const XOR = [
     { input: [0, 1], output: [1] },
@@ -28,6 +33,7 @@ const evolve = (data, config = {}) => {
     })
     const ecosystem = new Ecosystem({ population: creatures, size })
     const best = ecosystem.best()
+    visualization.present(best)
     // If goal is achieved, return the best individual.
     if (ecosystem.averageFitness() >= 0.9) return console.log(best.encode())
     // If goal is not achieved, continue the circle of life.
@@ -43,7 +49,9 @@ TEST RESULT: ${data.map(item => best.calculate(item.input)[0].toFixed(3))}`)
     // Reset fitnesses.
     ecosystem.population.forEach(individual => (individual.fitness = 0))
     creatures = [...ecosystem.population]
-    setTimeout(() => evolve(data, config), 0)
+    setTimeout(() => {
+        visualization.clear()
+        evolve(data, config)
+    }, 0)
 }
-
 evolve(XOR)

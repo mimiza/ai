@@ -5,3 +5,13 @@ body {
     margin: 0;
     padding: 0;
 }
+
+.container {
+    margin: auto;
+    width: 80%;
+    height: 80%;
+}
+
+/* .container textPath {
+    font-size: 10px;
+} */
