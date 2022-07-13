@@ -12,6 +12,14 @@ body {
     height: 80%;
 }
 
-/* .container textPath {
-    font-size: 10px;
-} */
+.container .connection {
+    stroke-dasharray: 5;
+    stroke-dashoffset: 100;
+    animation: dash 2s linear forwards;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: 0;
+    }
+}

@@ -66,7 +66,7 @@ export class Visualization {
             const cx2 = x2 - curve
             const cy2 = x1 >= x2 && y1 === y2 ? y2 - curve : y2
             // Draw connection.
-            this.draw("path", { id, d: `M ${x1} ${y1} C ${cx1} ${cy1} ${cx2} ${cy2} ${x2} ${y2}`, fill: "none", stroke: x1 < x2 ? this.colors.connection.forward : this.colors.connection.recursive, "stroke-width": 2 })
+            this.draw("path", { id, class: "connection", d: `M ${x1} ${y1} C ${cx1} ${cy1} ${cx2} ${cy2} ${x2} ${y2}`, fill: "none", stroke: x1 < x2 ? this.colors.connection.forward : this.colors.connection.recursive, "stroke-width": 2 })
             // Draw connection weight.
             this.draw("textPath", { href: "#" + id, fill: this.colors.text.weight, startOffset: curve, "font-size": text }, this.draw("text")).textContent = connection.w
         })
