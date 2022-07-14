@@ -8,14 +8,32 @@ body {
 
 .container {
     margin: auto;
-    width: 80%;
-    height: 80%;
+    width: 100%;
+    height: 100%;
 }
 
-.container .connection {
+.container g {
+    font-family: sans-serif;
+}
+
+.container g .connection {
+    opacity: 0.5;
     stroke-dasharray: 5;
     stroke-dashoffset: 100;
     animation: dash 2s linear forwards;
+}
+
+.container g:hover .connection {
+    opacity: 1;
+    stroke-dasharray: 0;
+}
+
+.container g .weight {
+    display: none;
+}
+
+.container g:hover .weight {
+    display: block;
 }
 
 @keyframes dash {

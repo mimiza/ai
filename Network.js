@@ -256,10 +256,10 @@ class Network {
         if (Math.random() < 0.001 && !this.layers.filter(l => !l.n.length).length) this.l.splice(random(1, this.layers.length - 2), 0, new Layer())
 
         // Add new random neuron.
-        if (Math.random() < 0.01) this.neuron({ layer: random(1, this.layers.length - 2), activator: random(activators) })
+        if (Math.random() < 0.001) this.neuron({ layer: random(1, this.layers.length - 2), activator: random(activators) })
 
         // Add new random connection.
-        if (Math.random() < 0.01) {
+        if (Math.random() < 0.1) {
             const from = random(this.neurons)
             const to = random(this.neurons)
             if (!this.connections.some(c => c.from.id === from.id && c.to.id === to.id)) this.connect({ from, to })
