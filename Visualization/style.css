@@ -19,8 +19,8 @@ body {
 .container g .connection {
     opacity: 0.5;
     stroke-dasharray: 5;
-    stroke-dashoffset: 100;
-    animation: dash 2s linear forwards;
+    stroke-dashoffset: 50;
+    animation: dash 1s linear forwards infinite;
 }
 
 .container g:hover .connection {

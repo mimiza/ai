@@ -1,5 +1,8 @@
 import Ecosystem from "../Ecosystem.js"
 import Network from "../Network.js"
+import Visualization from "../Visualization.js"
+
+const visualization = typeof document !== "undefined" ? new Visualization({ svg: document.querySelector("#visualization") }) : undefined
 
 const XOR = [
     { input: [0, 1], output: [1] },
@@ -28,6 +31,7 @@ const evolve = (data, config = {}) => {
     })
     const ecosystem = new Ecosystem({ population: creatures, size })
     const best = ecosystem.best()
+    if (visualization) visualization.present(best)
     // If goal is achieved, return the best individual.
     if (ecosystem.averageFitness() >= 0.9) return console.log(best.encode())
     // If goal is not achieved, continue the circle of life.

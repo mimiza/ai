@@ -27,7 +27,7 @@ export class Visualization {
     }
 
     clear() {
-        this.svg.innerHTML = ""
+        this.svg.replaceChildren()
     }
 
     present = (data = {}) => {
@@ -62,15 +62,15 @@ export class Visualization {
                 const to = !isNaN(connection[">"]["#"]) ? connection[">"]["#"] : connection[">"]
                 if (!connection.s || !data.n[from].s || !data.n[to].s) return
                 const id = `connection-${from}-${to}`
-                const curve = r * 3
+                const curve = r * 2
                 const x1 = map[from].x + r
                 const y1 = map[from].y
                 const x2 = map[to].x - r
                 const y2 = map[to].y
                 const cx1 = x1 + curve
-                const cy1 = x1 >= x2 && y1 === y2 ? y1 - curve : y1
+                const cy1 = x1 >= x2 && y1 === y2 ? y1 - curve * 1.5 : y1
                 const cx2 = x2 - curve
-                const cy2 = x1 >= x2 && y1 === y2 ? y2 - curve : y2
+                const cy2 = x1 >= x2 && y1 === y2 ? y2 - curve * 1.5 : y2
                 const transform = x1 > x2 ? "scale(+1,-1)" : ""
                 // Draw connection.
                 this.draw("path", { id, class: "connection", d: `M ${x1} ${y1} C ${cx1} ${cy1} ${cx2} ${cy2} ${x2} ${y2}`, fill: "none", stroke: x1 < x2 ? this.colors.connection.forward : this.colors.connection.recursive, "stroke-width": 2 }, group)

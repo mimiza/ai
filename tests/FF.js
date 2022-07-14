@@ -1,4 +1,7 @@
 import Network from "../Network.js"
+import Visualization from "../Visualization.js"
+
+const visualization = typeof document !== "undefined" ? new Visualization({ svg: document.querySelector("#visualization") }) : undefined
 
 const tests = []
 
@@ -42,6 +45,8 @@ const testIO = (data, config = {}) => {
         return r.map(Math.round)[0] === d.output[0]
     })
 
+    if (visualization) visualization.present(network)
+
     return test
 }
 
@@ -59,6 +64,8 @@ const testEncodeDecode = (data, config = {}) => {
         const r = newNetwork.calculate(d.input)
         return r.map(Math.round)[0] === d.output[0]
     })
+
+    if (visualization) visualization.present(network)
 
     return test
 }
