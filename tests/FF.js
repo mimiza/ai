@@ -73,7 +73,9 @@ const testEncodeDecode = (data, config = {}) => {
 const test = (...args) => {
     const name = args[0]
     const result = args[1] ? "OK" : "FAIL"
-    console.log(`Test "${name}": ${result}`)
+    const text = `Test "${name}": ${result}`
+    console.log(text)
+    if (visualization) document.querySelector("#info").textContent += `${text}\n`
     tests.push({ TEST: name, RESULT: result })
 }
 
