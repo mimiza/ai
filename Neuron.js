@@ -89,6 +89,15 @@ class Neuron {
         this.s = value
         return this.s
     }
+
+    get activator() {
+        return this.a
+    }
+
+    set activator(value) {
+        this.a = value
+        return this.a
+    }
 }
 
 export default Neuron

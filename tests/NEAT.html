@@ -2,17 +2,21 @@
 <html>
     <head>
         <title>Neural Network Topology Visualization</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0" />
         <link href="../Visualization/style.css" rel="stylesheet" />
     </head>
     <body>
-        <div class="columns is-gapless">
-            <div class="column">
-                <svg id="visualization" width="100%" height="100%"></svg>
-            </div>
-            <div class="column">
-                <pre id="info"></pre>
+        <div class="container">
+            <svg id="visualization"></svg>
+        </div>
+        <div class="container">
+            <pre id="info"></pre>
+        </div>
+        <div class="container">
+            <div class="buttons">
+                <button id="start" class="button is-success is-uppercase" type="button">Start</button>
+                <button id="stop" class="button is-danger is-uppercase" type="button">Stop</button>
             </div>
         </div>
         <script src="./NEAT.js" type="module"></script>

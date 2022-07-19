@@ -11,6 +11,7 @@ export class Visualization {
                 recursive: config?.colors?.connection?.recursive || "#7dd87d"
             },
             text: {
+                id: config?.colors?.text?.bias || "#d64161",
                 bias: config?.colors?.text?.bias || "#444444",
                 weight: config?.colors?.text?.weight || "#d64161"
             }
@@ -36,7 +37,7 @@ export class Visualization {
         const h = this.svg.height.baseVal.value
         const lw = w / data.l.length // Layer width.
         const r = lw * 0.1 // Neuron radius.
-        const text = r / 3
+        const text = Math.max(r / 3, 10)
         const map = {}
         data.l.forEach((layer, lindex) => {
             const neurons = layer.n || layer
@@ -55,7 +56,9 @@ export class Visualization {
             // Draw neuron.
             this.draw("circle", { cx: x, cy: y, r, fill: this.colors.neuron.fill, stroke: this.colors.neuron.stroke, "stroke-width": 2 }, group)
             // Draw neuron bias.
-            this.draw("text", { x, y, fill: this.colors.text.bias, "text-anchor": "middle", "dominant-baseline": "middle", "font-size": text }, group).textContent = parseFloat(neuron.b.toFixed(2))
+            this.draw("text", { class: "bias", x, y, fill: this.colors.text.bias, "text-anchor": "middle", "dominant-baseline": "middle", "font-size": text }, group).textContent = parseFloat(neuron.b.toFixed(2))
+            // Draw neuron ID.
+            this.draw("text", { class: "id", x, y, fill: this.colors.text.id, "text-anchor": "middle", "dominant-baseline": "middle", "font-size": text }, group).textContent = "#" + neuron["#"]
             // Draw output connections.
             neuron[">"].forEach(connection => {
                 const from = !isNaN(connection["<"]["#"]) ? connection["<"]["#"] : connection["<"] || neuron["#"]

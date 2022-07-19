@@ -9,7 +9,7 @@ class Ecosystem {
         // Coefficients for compatibility calculation.
         this.edc = config.edc || config.excessDisjointCoefficient || 1 // Excess and disjoint coefficient.
         this.wdc = config.wdc || config.weightDifferenceCoefficient || 0.5 // Weight difference coefficient.
-        this.compatibility = config.compatibility || 0.1 // Compatibility threshold.
+        this.compatibility = config.compatibility || 0.03 // Compatibility threshold.
     }
 
     best(population = this.population) {
@@ -67,10 +67,12 @@ class Ecosystem {
         if (seed < 0.5 && species.length > 2) return species[2]
         const threshold = Math.random() * species.reduce((value, individual) => (value += individual.fitness), 0)
         let sum = 0
-        return species.find(individual => {
-            sum += individual.fitness
-            if (sum > threshold) return true
-        })
+        return (
+            species.find(individual => {
+                sum += individual.fitness
+                if (sum > threshold) return true
+            }) || random(species)
+        )
     }
 
     crossover(...parents) {

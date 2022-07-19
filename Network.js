@@ -189,18 +189,18 @@ class Network {
         })
     }
 
-    calculate(input = []) {
+    calculate(input = [], debug = false) {
         this.clear()
         this.input = input
-        return this.propagate()
+        return this.propagate(debug)
     }
 
     activate(input, activator) {
         return this[activator || this.activator](input)
     }
 
-    propagate() {
-        const activated = []
+    propagate(debug = false) {
+        const history = []
         let loop = true
         // Loop until all neurons and their input neurons are activated.
         while (loop === true) {
@@ -211,11 +211,12 @@ class Network {
                     if (index === 0 && !neuron.inputs.length) neuron.output = neuron.input
                     // Multiply weights and outputs, summarize all inputs, then activate.
                     else neuron.output = this.activate(neuron.input + neuron.bias, activator)
-                    if (neuron.inputs.some(connection => !activated.includes(connection.from.id))) loop = true
-                    activated.push(neuron.id)
+                    if (neuron.inputs.some(connection => connection.from.output === undefined)) loop = true
+                    if (debug) history.push({ id: neuron.id, activator, state: neuron.state, inputs: neuron.inputs.map(connection => Object.assign({}, { id: connection.from.id, output: connection.from.output, weight: connection.weight })), input: neuron.input, bias: neuron.bias, output: neuron.output })
                 })
             )
         }
+        if (debug) console.log(history)
         // Return the output layer.
         return this.output
     }
@@ -283,7 +284,7 @@ class Network {
 
         this.connections.forEach(connection => {
             // Change random connection weight.
-            if (Math.random() < 1) connection.weight += connection.weight * random(0.01, 0.5) * random([-1, 1])
+            if (Math.random() < 0.8) connection.weight += connection.weight * random(0.01, 0.5) * random([-1, 1])
             // Enable/disable random connections.
             if (Math.random() < 0.001) connection.state = random([true, false])
         })

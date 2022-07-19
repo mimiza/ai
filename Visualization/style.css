@@ -8,8 +8,25 @@ body {
     padding: 0;
 }
 
+#visualization {
+    width: 100%;
+    height: 80vh;
+}
+
 #visualization g {
     font-family: sans-serif;
+}
+
+#visualization g:hover .bias {
+    display: none;
+}
+
+#visualization .id {
+    display: none;
+}
+
+#visualization g:hover .id {
+    display: block;
 }
 
 #visualization g .connection {
