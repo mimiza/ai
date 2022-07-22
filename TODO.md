@@ -10,12 +10,10 @@ NEAT ALGO
     -   Network.mutate()
     -   Ecosystem.speciate()
     -   Ecosystem.generate()
--   Why NEAT XOR best fit is always 6.25?
+-   Why NEAT XOR / RAND are not solved?
 
 TODOS:
 
--   mutate(): add random layers between input and output layers.
--   crossover(): check layer index, copy layers in between input and output layers.
 -   generate(): improve size of each species calculation.
 -   connect(): start with zero connection.
 -   Implement neural network topology visualization.

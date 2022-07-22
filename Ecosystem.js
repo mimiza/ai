@@ -3,13 +3,22 @@ import { random } from "./Utils.js"
 
 class Ecosystem {
     constructor(config = {}) {
+        this.mutation = {
+            layer: 0.001,
+            neuron: { rate: 0.01, enable: 0.01, disable: 0.001 },
+            bias: { rate: 0.01, min: -30, max: 30 },
+            connection: { rate: 0.1, enable: 0.01, disable: 0.001 },
+            node: 0.01,
+            weight: { rate: 0.01, min: -30, max: 30 },
+            ...config?.mutation
+        }
         this.population = config.population || config || [] // Population.
         this.species = config.species || [] // Species.
         this.size = config.size || 100 // Population size.
         // Coefficients for compatibility calculation.
         this.edc = config.edc || config.excessDisjointCoefficient || 1 // Excess and disjoint coefficient.
         this.wdc = config.wdc || config.weightDifferenceCoefficient || 0.5 // Weight difference coefficient.
-        this.compatibility = config.compatibility || 0.03 // Compatibility threshold.
+        this.compatibility = config.compatibility || 3 // Compatibility threshold.
     }
 
     best(population = this.population) {
@@ -131,6 +140,50 @@ class Ecosystem {
         return new Network(child)
     }
 
+    mutate(network) {
+        const activators = ["sigmoid", "relu", "tanh"]
+
+        // Add new random layer.
+        if (Math.random() < this.mutation.layer && !network.layers.filter(l => !l.n.length).length) network.layer({ index: random(1, network.layers.length - 2) })
+
+        // Add new random neuron.
+        if (Math.random() < this.mutation.neuron.rate) network.neuron({ layer: random(1, network.layers.length - 2), activator: random(activators) })
+
+        // Add new random connection.
+        if (Math.random() < this.mutation.connection.rate) {
+            const from = random(network.neurons)
+            const to = random(network.neurons)
+            if (!network.connections.some(c => c.from.id === from.id && c.to.id === to.id)) network.connect({ from, to })
+        }
+
+        // Add new random node between a connection.
+        if (Math.random() < this.mutation.node && network.connections.length) {
+            const connection = random(network.connections.filter(connection => connection.state))
+            const neuron = network.neuron({ layer: random(1, network.layers.length - 2), activator: random(activators) })
+            connection.state = false
+            network.connect({ from: connection.from, to: neuron.id })
+            network.connect({ from: neuron.id, to: connection.to })
+        }
+
+        network.neurons.forEach(neuron => {
+            // Change random neuron biases.
+            if (Math.random() < this.mutation.bias.rate) neuron.bias += neuron.bias * random(0.01, 0.2) * random([-1, 1])
+            // Enable random neuron.
+            if (!neuron.state && Math.random() < this.mutation.neuron.enable && ![...network.layers[0].n, ...network.layers[network.layers.length - 1].n].some(n => n.id === neuron.id)) neuron.state = true
+            // Disable random neuron.
+            if (neuron.state && Math.random() < this.mutation.neuron.disable && ![...network.layers[0].n, ...network.layers[network.layers.length - 1].n].some(n => n.id === neuron.id)) neuron.state = false
+        })
+
+        network.connections.forEach(connection => {
+            // Change random connection weight.
+            if (Math.random() < this.mutation.weight.rate) connection.weight += connection.weight * random(0.01, 0.5) * random([-1, 1])
+            // Enable random connections.
+            if (!connection.state && Math.random() < this.mutation.connection.enable) connection.state = true
+            // Disable random connections.
+            if (connection.state && Math.random() < this.mutation.connection.disable) connection.state = false
+        })
+    }
+
     generate() {
         const generation = []
         // Calculate average fitness of the entire population.
@@ -144,7 +197,7 @@ class Ecosystem {
                 const father = this.select(species)
                 const mother = this.select(species)
                 const child = this.crossover(father, mother)
-                child.mutate()
+                this.mutate(child)
                 generation.push(child)
             }
         })

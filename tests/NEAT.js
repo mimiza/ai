@@ -11,16 +11,39 @@ const XOR = [
     { input: [1, 1], output: [0] }
 ]
 
+const AND = [
+    { input: [0, 1], output: [0] },
+    { input: [1, 0], output: [0] },
+    { input: [0, 0], output: [0] },
+    { input: [1, 1], output: [1] }
+]
+
+const OR = [
+    { input: [0, 1], output: [1] },
+    { input: [1, 0], output: [1] },
+    { input: [0, 0], output: [0] },
+    { input: [1, 1], output: [1] }
+]
+
+const RAND = [
+    { input: [0, 1], output: [0] },
+    { input: [1, 0], output: [1] },
+    { input: [0, 0], output: [1] },
+    { input: [1, 1], output: [0] }
+]
+
 let run = 1
 let ecosystem
 let generation = 0
 const size = 100
 let creatures = []
 
+const data = OR
+
 if (typeof document !== "undefined") {
     document.querySelector("#start").onclick = () => {
         run = 1
-        evolve(XOR)
+        evolve(data)
     }
     document.querySelector("#stop").onclick = () => {
         run = 0
@@ -38,28 +61,34 @@ const evolve = (data, config = {}) => {
     generation++
     creatures.forEach(creature => {
         // Do exams to get error. Error indicates how far we are to the goal. Smaller is better.
-        const exams = data.map(item => item.output[0] - creature.calculate(item.input)[0])
-        const error = exams.reduce((value, item) => (value += Math.abs(item)), 0) / data.length
+        const error = data.map(item => Math.pow(item.output[0] - creature.calculate(item.input)[0], 2)).reduce((value, item) => (value += item), 0)
         // Calculate fitness using error. Greater is better.
-        creature.fitness = 1 - error
+        creature.fitness = data.length - error
         creature.error = error
     })
 
-    ecosystem = new Ecosystem({ population: creatures, size })
+    ecosystem = new Ecosystem({ compatibility: 3, population: creatures, size })
     const best = ecosystem.best()
     if (visualization) visualization.present(best)
     // If goal is achieved, return the best individual.
-    if (ecosystem.averageFitness() >= 0.85) return console.log(best)
+    if (ecosystem.averageFitness() >= 0.9 * data.length) return console.log(best)
     // If goal is not achieved, continue the circle of life.
     ecosystem.speciate()
     ecosystem.generate()
     console.clear()
-    const text = `GENERATION: ${generation}
+    const text = `
+GENERATION: ${generation}
 POPULATION: ${ecosystem.population.length}
 SPECIES: ${ecosystem.species.length}
 FITNESS: ${ecosystem.averageFitness().toFixed(3)}
-BEST FIT: ${best.fitness.toFixed(3)} - ERROR: ${best.error.toFixed(3)} - LAYERS: ${best.layers.length} - NEURONS: ${best.n.length} - CONNECTIONS: ${best.c.length}
-TEST RESULT: ${data.map(item => best.calculate(item.input)[0].toFixed(3))}`
+BEST FIT: ${best.fitness.toFixed(3)}
+ERROR: ${best.error.toFixed(3)}
+LAYERS: ${best.layers.length}
+NEURONS: ${best.n.length}
+CONNECTIONS: ${best.c.length}
+INPUTS: ${data.map(item => item.input.join("-")).join(", ")}
+TEST RESULT: ${data.map(item => best.calculate(item.input)[0].toFixed(3)).join(", ")}
+EXPECTED RESULT: ${data.map(item => item.output[0]).join(", ")}`
     console.log(text)
     if (visualization) document.querySelector("#info").textContent = text
     // Reset fitnesses.
@@ -68,4 +97,4 @@ TEST RESULT: ${data.map(item => best.calculate(item.input)[0].toFixed(3))}`
     setTimeout(() => evolve(data, config), 0)
 }
 
-evolve(XOR)
+evolve(data)

@@ -123,7 +123,8 @@ class Network {
         }
         const layer = new Layer(config)
         if (layer) {
-            this.l.push(layer) // Add new layer to array of layers.
+            const index = !isNaN(config.i) ? Number(config.i) : !isNaN(config.index) ? Number(config.index) : this.l.length // Make sure 0 is also be assigned.
+            this.l.splice(index, 0, layer)
             const neurons = config.n || config.neurons || config
             if (Number.isInteger(neurons)) for (let i = 0; i < neurons; i++) this.neuron({ layer })
         }
@@ -248,46 +249,6 @@ class Network {
                 neuron.bias -= this.rate * neuron.delta
             })
         )
-    }
-
-    mutate() {
-        const activators = ["sigmoid", "relu", "tanh"]
-
-        // Add new random layer.
-        if (Math.random() < 0.001 && !this.layers.filter(l => !l.n.length).length) this.l.splice(random(1, this.layers.length - 2), 0, new Layer())
-
-        // Add new random neuron.
-        if (Math.random() < 0.001) this.neuron({ layer: random(1, this.layers.length - 2), activator: random(activators) })
-
-        // Add new random connection.
-        if (Math.random() < 0.1) {
-            const from = random(this.neurons)
-            const to = random(this.neurons)
-            if (!this.connections.some(c => c.from.id === from.id && c.to.id === to.id)) this.connect({ from, to })
-        }
-
-        // Add new random node between a connection.
-        if (Math.random() < 0.01 && this.connections.length) {
-            const connection = random(this.connections.filter(connection => connection.state))
-            const neuron = this.neuron({ layer: random(1, this.layers.length - 2), activator: random(activators) })
-            connection.state = false
-            this.connect({ from: connection.from, to: neuron.id })
-            this.connect({ from: neuron.id, to: connection.to })
-        }
-
-        this.neurons.forEach(neuron => {
-            // Change random neuron biases.
-            if (Math.random() < 0.1) neuron.bias += neuron.bias * random(0.01, 0.2) * random([-1, 1])
-            // Enable/disable random neuron.
-            if (Math.random() < 0.001 && ![...this.layers[0].n, ...this.layers[this.layers.length - 1].n].some(n => n.id === neuron.id)) neuron.state = random([true, false])
-        })
-
-        this.connections.forEach(connection => {
-            // Change random connection weight.
-            if (Math.random() < 0.8) connection.weight += connection.weight * random(0.01, 0.5) * random([-1, 1])
-            // Enable/disable random connections.
-            if (Math.random() < 0.001) connection.state = random([true, false])
-        })
     }
 
     sigmoid(x = 0) {
