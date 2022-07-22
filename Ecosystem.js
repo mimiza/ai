@@ -167,7 +167,7 @@ class Ecosystem {
 
         network.neurons.forEach(neuron => {
             // Change random neuron biases.
-            if (Math.random() < this.mutation.bias.rate) neuron.bias += neuron.bias * random(0.01, 0.2) * random([-1, 1])
+            if (Math.random() < this.mutation.bias.rate) neuron.bias += neuron.bias * random(0.01, 0.5) * random([-1, 1])
             // Enable random neuron.
             if (!neuron.state && Math.random() < this.mutation.neuron.enable && ![...network.layers[0].n, ...network.layers[network.layers.length - 1].n].some(n => n.id === neuron.id)) neuron.state = true
             // Disable random neuron.
@@ -185,13 +185,15 @@ class Ecosystem {
     }
 
     generate() {
+        this.speciate()
         const generation = []
         // Calculate average fitness of the entire population.
         const populationFitness = this.averageFitness()
-        const sizes = this.species.map(species => Math.ceil((this.averageFitness(species) / populationFitness) * species.length))
+        const sizes = this.species.map(species => Math.round((this.averageFitness(species) / populationFitness) * species.length))
         const total = sizes.reduce((value, size) => (value += size), 0)
+        const target = total / this.species.length
         this.species.forEach((species, index) => {
-            const size = (sizes[index] * this.size) / total
+            const size = sizes[index] + ((target - sizes[index]) * 0.5 * this.size) / total
             for (let i = 0; i < size; i++) {
                 // Select parents and crossover.
                 const father = this.select(species)

@@ -36,9 +36,13 @@ let run = 1
 let ecosystem
 let generation = 0
 const size = 100
-let creatures = []
+let population = []
+const config = {
+    compatibility: 0.5,
+    size
+}
 
-const data = OR
+const data = XOR
 
 if (typeof document !== "undefined") {
     document.querySelector("#start").onclick = () => {
@@ -53,13 +57,13 @@ if (typeof document !== "undefined") {
 
 for (let i = 0; i < size; i++) {
     const creature = new Network({ layers: [2, 0, 1] })
-    creatures.push(creature)
+    population.push(creature)
 }
 
-const evolve = (data, config = {}) => {
+const evolve = data => {
     if (run === 0) return
     generation++
-    creatures.forEach(creature => {
+    population.forEach(creature => {
         // Do exams to get error. Error indicates how far we are to the goal. Smaller is better.
         const error = data.map(item => Math.pow(item.output[0] - creature.calculate(item.input)[0], 2)).reduce((value, item) => (value += item), 0)
         // Calculate fitness using error. Greater is better.
@@ -67,13 +71,12 @@ const evolve = (data, config = {}) => {
         creature.error = error
     })
 
-    ecosystem = new Ecosystem({ compatibility: 3, population: creatures, size })
+    ecosystem = new Ecosystem({ population, ...config })
     const best = ecosystem.best()
     if (visualization) visualization.present(best)
     // If goal is achieved, return the best individual.
-    if (ecosystem.averageFitness() >= 0.9 * data.length) return console.log(best)
+    if (best.fitness >= 0.95 * data.length) return console.log({ best, ecosystem })
     // If goal is not achieved, continue the circle of life.
-    ecosystem.speciate()
     ecosystem.generate()
     console.clear()
     const text = `
@@ -93,8 +96,8 @@ EXPECTED RESULT: ${data.map(item => item.output[0]).join(", ")}`
     if (visualization) document.querySelector("#info").textContent = text
     // Reset fitnesses.
     ecosystem.population.forEach(individual => (individual.fitness = 0))
-    creatures = [...ecosystem.population]
-    setTimeout(() => evolve(data, config), 0)
+    population = [...ecosystem.population]
+    setTimeout(() => evolve(data), 0)
 }
 
 evolve(data)

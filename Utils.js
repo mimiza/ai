@@ -12,4 +12,10 @@ export const random = (...input) => {
     }
 }
 
-export default { uid, random }
+export const rearrange = (...inputs) => {
+    const sum = inputs.reduce((value, item) => value + item, 0)
+    const target = sum / inputs.length
+    return inputs.map(value => value + (target - value) * 0.75)
+}
+
+export default { uid, random, rearrange }
