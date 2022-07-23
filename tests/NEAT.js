@@ -1,56 +1,31 @@
 import Ecosystem from "../Ecosystem.js"
 import Network from "../Network.js"
 import Visualization from "../Visualization.js"
+import exams from "./exams.js"
 
 const visualization = typeof document !== "undefined" ? new Visualization({ svg: document.querySelector("#visualization") }) : undefined
 
-const XOR = [
-    { input: [0, 1], output: [1] },
-    { input: [1, 0], output: [1] },
-    { input: [0, 0], output: [0] },
-    { input: [1, 1], output: [0] }
-]
-
-const AND = [
-    { input: [0, 1], output: [0] },
-    { input: [1, 0], output: [0] },
-    { input: [0, 0], output: [0] },
-    { input: [1, 1], output: [1] }
-]
-
-const OR = [
-    { input: [0, 1], output: [1] },
-    { input: [1, 0], output: [1] },
-    { input: [0, 0], output: [0] },
-    { input: [1, 1], output: [1] }
-]
-
-const RAND = [
-    { input: [0, 1], output: [0] },
-    { input: [1, 0], output: [1] },
-    { input: [0, 0], output: [1] },
-    { input: [1, 1], output: [0] }
-]
-
-let run = 1
+let run = true
 let ecosystem
 let generation = 0
 const size = 100
 let population = []
 const config = {
     compatibility: 0.5,
+    edc: 1,
+    wdc: 0.5,
     size
 }
 
-const data = XOR
+const data = exams[process.argv[2] || "XOR"]
 
 if (typeof document !== "undefined") {
     document.querySelector("#start").onclick = () => {
-        run = 1
+        run = true
         evolve(data)
     }
     document.querySelector("#stop").onclick = () => {
-        run = 0
+        run = false
         console.log(ecosystem)
     }
 }
@@ -61,7 +36,7 @@ for (let i = 0; i < size; i++) {
 }
 
 const evolve = data => {
-    if (run === 0) return
+    if (run === false) return
     generation++
     population.forEach(creature => {
         // Do exams to get error. Error indicates how far we are to the goal. Smaller is better.

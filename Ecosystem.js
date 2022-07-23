@@ -193,7 +193,7 @@ class Ecosystem {
         const total = sizes.reduce((value, size) => (value += size), 0)
         const target = total / this.species.length
         this.species.forEach((species, index) => {
-            const size = sizes[index] + ((target - sizes[index]) * 0.5 * this.size) / total
+            const size = sizes[index] + (target - sizes[index]) * 0.5 * this.size / total
             for (let i = 0; i < size; i++) {
                 // Select parents and crossover.
                 const father = this.select(species)

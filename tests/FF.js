@@ -1,37 +1,10 @@
 import Network from "../Network.js"
 import Visualization from "../Visualization.js"
+import { XOR, AND, OR, RAND } from "./exams.js"
 
 const visualization = typeof document !== "undefined" ? new Visualization({ svg: document.querySelector("#visualization") }) : undefined
 
 const tests = []
-
-const XOR = [
-    { input: [0, 1], output: [1] },
-    { input: [1, 0], output: [1] },
-    { input: [0, 0], output: [0] },
-    { input: [1, 1], output: [0] }
-]
-
-const AND = [
-    { input: [0, 1], output: [0] },
-    { input: [1, 0], output: [0] },
-    { input: [0, 0], output: [0] },
-    { input: [1, 1], output: [1] }
-]
-
-const OR = [
-    { input: [0, 1], output: [1] },
-    { input: [1, 0], output: [1] },
-    { input: [0, 0], output: [0] },
-    { input: [1, 1], output: [1] }
-]
-
-const RAND = [
-    { input: [0, 1], output: [0] },
-    { input: [1, 0], output: [1] },
-    { input: [0, 0], output: [1] },
-    { input: [1, 1], output: [0] }
-]
 
 const testIO = (data, config = {}) => {
     const network = new Network({ layers: [2, 0, 10, 0, 1], ...config })
