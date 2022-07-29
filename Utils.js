@@ -18,4 +18,12 @@ export const rearrange = (...inputs) => {
     return inputs.map(value => value + (target - value) * 0.75)
 }
 
-export default { uid, random, rearrange }
+export const merge = (destination = {}, source = {}) => {
+    for (const key in source) {
+        if (typeof destination[key] === "object") destination[key] = merge(destination[key], source[key])
+        else destination[key] = source[key]
+    }
+    return destination
+}
+
+export default { uid, random, rearrange, merge }

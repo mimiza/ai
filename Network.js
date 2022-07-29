@@ -190,18 +190,17 @@ class Network {
         })
     }
 
-    calculate(input = [], debug = false) {
+    calculate(input = []) {
         this.clear()
         this.input = input
-        return this.propagate(debug)
+        return this.propagate()
     }
 
     activate(input, activator) {
         return this[activator || this.activator](input)
     }
 
-    propagate(debug = false) {
-        const history = []
+    propagate() {
         let loop = true
         // Loop until all neurons and their input neurons are activated.
         while (loop === true) {
@@ -213,11 +212,9 @@ class Network {
                     // Multiply weights and outputs, summarize all inputs, then activate.
                     else neuron.output = this.activate(neuron.input + neuron.bias, activator)
                     if (neuron.inputs.some(connection => connection.from.output === undefined)) loop = true
-                    if (debug) history.push({ id: neuron.id, activator, state: neuron.state, inputs: neuron.inputs.map(connection => Object.assign({}, { id: connection.from.id, output: connection.from.output, weight: connection.weight })), input: neuron.input, bias: neuron.bias, output: neuron.output })
                 })
             )
         }
-        if (debug) console.log(history)
         // Return the output layer.
         return this.output
     }
