@@ -8,10 +8,10 @@ const visualization = typeof document !== "undefined" ? new Visualization({ svg:
 let run = true
 let ecosystem
 let generation = 0
-const size = 100
+const size = 1000
 let population = []
 const config = {
-    compatibility: 0.5,
+    compatibility: 3,
     edc: 1,
     wdc: 0.5,
     size,
