@@ -3,17 +3,17 @@ import { random, merge } from "./Utils.js"
 
 class Ecosystem {
     constructor(config = {}) {
-        this.mutation = {
-            layer: 0.001,
-            neuron: { rate: 0.01, enable: 0.01, disable: 0.001 },
-            bias: { rate: 0.01, min: -1, max: 1, range: [0, 2] },
-            connection: { rate: 0.1, enable: 0.01, disable: 0.001 },
-            node: 0.01,
-            weight: { rate: 0.01, min: -1, max: 1 }
-        }
-        merge(this.mutation, config.mutation)
-        console.log(this.mutation)
-        process.exit()
+        this.mutation = merge(
+            {
+                layer: 0.001,
+                neuron: { rate: 0.01, enable: 0.01, disable: 0.001 },
+                bias: { rate: 0.1, min: -1, max: 1, range: [0.01, 2] },
+                connection: { rate: 0.1, enable: 0.01, disable: 0.001 },
+                node: 0.01,
+                weight: { rate: 0.1, min: -1, max: 1, range: [0.01, 2] }
+            },
+            config
+        )
         this.population = config.population || config || [] // Population.
         this.species = config.species || [] // Species.
         this.size = config.size || 100 // Population size.
@@ -169,7 +169,7 @@ class Ecosystem {
 
         network.neurons.forEach(neuron => {
             // Change random neuron biases.
-            if (Math.random() < this.mutation.bias.rate) neuron.bias += neuron.bias * random(0.01, 2) * random([-1, 1])
+            if (Math.random() < this.mutation.bias.rate) neuron.bias += neuron.bias * random(...this.mutation.bias.range) * random([-1, 1])
             // Enable random neuron.
             if (!neuron.state && Math.random() < this.mutation.neuron.enable && ![...network.layers[0].n, ...network.layers[network.layers.length - 1].n].some(n => n.id === neuron.id)) neuron.state = true
             // Disable random neuron.
@@ -178,7 +178,7 @@ class Ecosystem {
 
         network.connections.forEach(connection => {
             // Change random connection weight.
-            if (Math.random() < this.mutation.weight.rate) connection.weight += connection.weight * random(0.01, 2) * random([-1, 1])
+            if (Math.random() < this.mutation.weight.rate) connection.weight += connection.weight * random(...this.mutation.weight.range) * random([-1, 1])
             // Enable random connections.
             if (!connection.state && Math.random() < this.mutation.connection.enable) connection.state = true
             // Disable random connections.
