@@ -1,12 +1,13 @@
 import http from "http"
 import fs from "fs"
 import path from "path"
+import url from "url"
 
 const port = 3000
 
 http.createServer(function (request, response) {
     console.log("REQUEST", request.url)
-    const file = "." + request.url
+    const file = "." + url.parse(request.url).pathname
     const ext = String(path.extname(file)).toLowerCase()
     const types = {
         ".html": "text/html",

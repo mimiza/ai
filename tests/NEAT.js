@@ -11,7 +11,7 @@ let generation = 0
 const size = 1000
 let population = []
 const config = {
-    compatibility: 2,
+    compatibility: 3,
     edc: 1.5,
     wdc: 0.5,
     size,
@@ -25,7 +25,8 @@ const config = {
     }
 }
 
-const data = exams[process.argv[2] || "XOR"]
+const exam = typeof process !== "undefined" ? process.argv[2] || "XOR" : new URLSearchParams(window.location.search).get("exam") || "XOR"
+const data = exams[exam]
 
 if (typeof document !== "undefined") {
     document.querySelector("#start").onclick = () => {

@@ -46,7 +46,7 @@ class Neuron {
     }
 
     get input() {
-        return this.inputs.reduce((value, connection) => (value += connection.weight * connection.from.output), 0) || this.i
+        return this.inputs.reduce((value, connection) => (value += connection.weight * (connection.from.output || 0)), 0) || this.i
     }
 
     set input(value) {

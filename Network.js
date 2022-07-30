@@ -1,7 +1,7 @@
 import Connection from "./Connection.js"
 import Layer from "./Layer.js"
 import Neuron from "./Neuron.js"
-import { random } from "./Utils.js"
+import activators from "./Activators.js"
 
 class Network {
     constructor(config = {}) {
@@ -197,7 +197,7 @@ class Network {
     }
 
     activate(input, activator) {
-        return this[activator || this.activator](input)
+        return activators[activator || this.activator](input)
     }
 
     propagate() {
@@ -208,9 +208,13 @@ class Network {
             this.layers.forEach((layer, index) =>
                 layer.neurons.forEach(neuron => {
                     const activator = neuron.activator || layer.activator || this.activator
+                    // If this is a standalone neuron, just skip it.
+                    if (!neuron.inputs.length && !neuron.outputs.length) return
+                    // If this is input layer, and the neuron has no input connections, then its output equals to its input.
                     if (index === 0 && !neuron.inputs.length) neuron.output = neuron.input
                     // Multiply weights and outputs, summarize all inputs, then activate.
                     else neuron.output = this.activate(neuron.input + neuron.bias, activator)
+                    // console.log({ id: neuron.id, bias: neuron.bias, activator: activator, inputs: neuron.inputs.map(c => Object.assign({}, { id: c.from.id, output: c.from.output, weight: c.weight })), input: neuron.input, output: neuron.output }, "\n")
                     if (neuron.inputs.some(connection => connection.from.output === undefined)) loop = true
                 })
             )
@@ -246,18 +250,6 @@ class Network {
                 neuron.bias -= this.rate * neuron.delta
             })
         )
-    }
-
-    sigmoid(x = 0) {
-        return 1 / (1 + Math.exp(-x))
-    }
-
-    relu(x = 0) {
-        return Math.max(0, x)
-    }
-
-    tanh(x = 0) {
-        return Math.tanh(x)
     }
 
     encode(data = this) {
