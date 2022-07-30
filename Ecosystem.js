@@ -12,7 +12,7 @@ class Ecosystem {
                 node: 0.01,
                 weight: { rate: 0.1, min: -1, max: 1, range: [0.01, 2] }
             },
-            config
+            config?.mutation
         )
         this.population = config.population || config || [] // Population.
         this.species = config.species || [] // Species.

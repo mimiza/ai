@@ -11,17 +11,17 @@ let generation = 0
 const size = 1000
 let population = []
 const config = {
-    compatibility: 3,
-    edc: 1,
+    compatibility: 2,
+    edc: 1.5,
     wdc: 0.5,
     size,
     mutation: {
         layer: 0.001,
         neuron: { rate: 0.01, enable: 0.01, disable: 0.001 },
         bias: { rate: 0.01, min: -1, max: 1, range: [0, 2] },
-        connection: { rate: 0.1, enable: 0.01, disable: 0.001 },
+        connection: { rate: 0.01, enable: 0.01, disable: 0.001 },
         node: 0.01,
-        weight: { rate: 0.8, min: -1, max: 1, range: [0, 2] }
+        weight: { rate: 0.01, min: -1, max: 1, range: [0, 2] }
     }
 }
 
