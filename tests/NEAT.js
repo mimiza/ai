@@ -8,7 +8,7 @@ const visualization = typeof document !== "undefined" ? new Visualization({ svg:
 let run = true
 let ecosystem
 let generation = 0
-const size = 1000
+const size = 100
 let population = []
 const config = {
     compatibility: 3,
@@ -17,11 +17,11 @@ const config = {
     size,
     mutation: {
         layer: 0.001,
-        neuron: { rate: 0.01, enable: 0.01, disable: 0.001 },
-        bias: { rate: 0.01, min: -1, max: 1, range: [0, 2] },
+        neuron: { rate: 0.001, enable: 0.01, disable: 0.001 },
+        bias: { rate: 0.1, min: -1, max: 1, range: [0, 2] },
         connection: { rate: 0.01, enable: 0.01, disable: 0.001 },
-        node: 0.01,
-        weight: { rate: 0.01, min: -1, max: 1, range: [0, 2] }
+        node: 0.5,
+        weight: { rate: 0.1, min: -1, max: 1, range: [0, 2] }
     }
 }
 
@@ -59,7 +59,7 @@ const evolve = data => {
     const best = ecosystem.best()
     if (visualization) visualization.present(best)
     // If goal is achieved, return the best individual.
-    if (best.fitness >= 0.95 * data.length) return console.log({ best, ecosystem })
+    if (best.fitness >= 0.99 * data.length) return console.log({ best, ecosystem })
     // If goal is not achieved, continue the circle of life.
     ecosystem.generate()
     console.clear()

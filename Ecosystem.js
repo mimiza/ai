@@ -6,11 +6,11 @@ class Ecosystem {
         this.mutation = merge(
             {
                 layer: 0.001,
-                neuron: { rate: 0.01, enable: 0.01, disable: 0.001 },
-                bias: { rate: 0.1, min: -1, max: 1, range: [0.01, 2] },
-                connection: { rate: 0.1, enable: 0.01, disable: 0.001 },
-                node: 0.01,
-                weight: { rate: 0.1, min: -1, max: 1, range: [0.01, 2] }
+                neuron: { rate: 0.001, enable: 0.01, disable: 0.001 },
+                bias: { rate: 0.1, min: -1, max: 1, range: [0, 2] },
+                connection: { rate: 0.01, enable: 0.01, disable: 0.001 },
+                node: 0.5,
+                weight: { rate: 0.1, min: -1, max: 1, range: [0, 2] }
             },
             config?.mutation
         )
