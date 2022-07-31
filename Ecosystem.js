@@ -6,11 +6,11 @@ class Ecosystem {
         this.mutation = merge(
             {
                 layer: 0.001,
-                neuron: { rate: 0.001, enable: 0.01, disable: 0.001 },
-                bias: { rate: 0.1, min: -1, max: 1, range: [0, 2] },
+                neuron: { rate: 0.001, enable: 0.01, disable: 0.001 }, // Add "max" to limit the number of neurons.
+                bias: { rate: 0.1, range: [0, 2] }, // Add min/max to limit the value biases.
                 connection: { rate: 0.01, enable: 0.01, disable: 0.001 },
                 node: 0.5,
-                weight: { rate: 0.1, min: -1, max: 1, range: [0, 2] }
+                weight: { rate: 0.1, range: [0, 2] } // Add min/max to limit the value of weights.
             },
             config?.mutation
         )
@@ -149,7 +149,7 @@ class Ecosystem {
         if (Math.random() < this.mutation.layer && !network.layers.filter(l => !l.n.length).length) network.layer({ index: random(1, network.layers.length - 2) })
 
         // Add new random neuron.
-        if (Math.random() < this.mutation.neuron.rate) network.neuron({ layer: random(1, network.layers.length - 2), activator: random(activators) })
+        if (Math.random() < this.mutation.neuron.rate && (typeof this.mutation.neuron.max === "undefined" || network.neurons.length < this.mutation.neuron.max)) network.neuron({ layer: random(1, network.layers.length - 2), activator: random(activators) })
 
         // Add new random connection.
         if (Math.random() < this.mutation.connection.rate) {
@@ -159,7 +159,7 @@ class Ecosystem {
         }
 
         // Add new random node between a connection.
-        if (Math.random() < this.mutation.node && network.connections.length) {
+        if (Math.random() < this.mutation.node && network.connections.length && (typeof this.mutation.neuron.max === "undefined" || network.neurons.length < this.mutation.neuron.max)) {
             const connection = random(network.connections.filter(connection => connection.state))
             const neuron = network.neuron({ layer: random(1, network.layers.length - 2), activator: random(activators) })
             connection.state = false
@@ -169,7 +169,11 @@ class Ecosystem {
 
         network.neurons.forEach(neuron => {
             // Change random neuron biases.
-            if (Math.random() < this.mutation.bias.rate) neuron.bias += neuron.bias * random(...this.mutation.bias.range) * random([-1, 1])
+            if (Math.random() < this.mutation.bias.rate) {
+                neuron.bias += neuron.bias * random(...this.mutation.bias.range) * random([-1, 1])
+                if (typeof this.mutation.bias.min !== "undefined") neuron.bias = Math.max(neuron.bias, this.mutation.bias.min)
+                if (typeof this.mutation.bias.max !== "undefined") neuron.bias = Math.min(neuron.bias, this.mutation.bias.max)
+            }
             // Enable random neuron.
             if (!neuron.state && Math.random() < this.mutation.neuron.enable && ![...network.layers[0].n, ...network.layers[network.layers.length - 1].n].some(n => n.id === neuron.id)) neuron.state = true
             // Disable random neuron.
@@ -178,7 +182,11 @@ class Ecosystem {
 
         network.connections.forEach(connection => {
             // Change random connection weight.
-            if (Math.random() < this.mutation.weight.rate) connection.weight += connection.weight * random(...this.mutation.weight.range) * random([-1, 1])
+            if (Math.random() < this.mutation.weight.rate) {
+                connection.weight += connection.weight * random(...this.mutation.weight.range) * random([-1, 1])
+                if (typeof this.mutation.weight.min !== "undefined") connection.weight = Math.max(connection.weight, this.mutation.weight.min)
+                if (typeof this.mutation.weight.max !== "undefined") connection.weight = Math.min(connection.weight, this.mutation.weight.max)
+            }
             // Enable random connections.
             if (!connection.state && Math.random() < this.mutation.connection.enable) connection.state = true
             // Disable random connections.
