@@ -7,10 +7,10 @@ class Ecosystem {
             {
                 layer: 0.001,
                 neuron: { rate: 0.001, enable: 0.01, disable: 0.001 }, // Add "max" to limit the number of neurons.
-                bias: { rate: 0.1, range: [0, 2] }, // Add min/max to limit the value biases.
+                bias: { rate: 0.1, change: [0, 2] }, // Add min/max to limit the value biases.
                 connection: { rate: 0.01, enable: 0.01, disable: 0.001 },
                 node: 0.5,
-                weight: { rate: 0.1, range: [0, 2] } // Add min/max to limit the value of weights.
+                weight: { rate: 0.1, change: [0, 2] } // Add min/max to limit the value of weights.
             },
             config?.mutation
         )
@@ -149,7 +149,7 @@ class Ecosystem {
         if (Math.random() < this.mutation.layer && !network.layers.filter(l => !l.n.length).length) network.layer({ index: random(1, network.layers.length - 2) })
 
         // Add new random neuron.
-        if (Math.random() < this.mutation.neuron.rate && (typeof this.mutation.neuron.max === "undefined" || network.neurons.length < this.mutation.neuron.max)) network.neuron({ layer: random(1, network.layers.length - 2), activator: random(activators) })
+        if (Math.random() < this.mutation.neuron.rate && (isNaN(this.mutation.neuron.max) || network.neurons.length < this.mutation.neuron.max)) network.neuron({ layer: random(1, network.layers.length - 2), activator: random(activators) })
 
         // Add new random connection.
         if (Math.random() < this.mutation.connection.rate) {
@@ -170,9 +170,9 @@ class Ecosystem {
         network.neurons.forEach(neuron => {
             // Change random neuron biases.
             if (Math.random() < this.mutation.bias.rate) {
-                neuron.bias += neuron.bias * random(...this.mutation.bias.range) * random([-1, 1])
-                if (typeof this.mutation.bias.min !== "undefined") neuron.bias = Math.max(neuron.bias, this.mutation.bias.min)
-                if (typeof this.mutation.bias.max !== "undefined") neuron.bias = Math.min(neuron.bias, this.mutation.bias.max)
+                neuron.bias += neuron.bias * random(...this.mutation.bias.change) * random([-1, 1])
+                if (!isNaN(this.mutation.bias.min)) neuron.bias = Math.max(neuron.bias, this.mutation.bias.min)
+                if (!isNaN(this.mutation.bias.max)) neuron.bias = Math.min(neuron.bias, this.mutation.bias.max)
             }
             // Enable random neuron.
             if (!neuron.state && Math.random() < this.mutation.neuron.enable && ![...network.layers[0].n, ...network.layers[network.layers.length - 1].n].some(n => n.id === neuron.id)) neuron.state = true
@@ -183,7 +183,7 @@ class Ecosystem {
         network.connections.forEach(connection => {
             // Change random connection weight.
             if (Math.random() < this.mutation.weight.rate) {
-                connection.weight += connection.weight * random(...this.mutation.weight.range) * random([-1, 1])
+                connection.weight += connection.weight * random(...this.mutation.weight.change) * random([-1, 1])
                 if (typeof this.mutation.weight.min !== "undefined") connection.weight = Math.max(connection.weight, this.mutation.weight.min)
                 if (typeof this.mutation.weight.max !== "undefined") connection.weight = Math.min(connection.weight, this.mutation.weight.max)
             }

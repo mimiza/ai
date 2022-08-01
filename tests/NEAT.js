@@ -18,10 +18,10 @@ const config = {
     mutation: {
         layer: 0.001,
         neuron: { rate: 0.001, max: 10, enable: 0.01, disable: 0.001 },
-        bias: { rate: 0.1, range: [0, 2] },
+        bias: { rate: 0.05, change: [0, 2] },
         connection: { rate: 0.01, enable: 0.01, disable: 0.001 },
         node: 0.5,
-        weight: { rate: 0.1, range: [0, 2] }
+        weight: { rate: 0.05, change: [0, 2] }
     }
 }
 
