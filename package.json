@@ -1,5 +1,5 @@
 {
-    "name": "ai",
+    "name": "@mimiza/ai",
     "type": "module",
     "version": "1.0.0",
     "description": "Personal AI library in NodeJS",
