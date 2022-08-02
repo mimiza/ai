@@ -110,7 +110,7 @@ class Network {
         this.n = [] // Neurons.
         this.c = [] // Connections.
         this.t = config.t || config.type || "ff" // Network type, "ff" for feedforward, "neat" for NEAT.
-        this.a = config.a || config.activator || "sigmoid" // Activator (sigmoid/relu/tanh), used as default activator if no neuron/layer activator exists.
+        this.a = typeof config.a !== "undefined" ? config.a : typeof config.activator !== "undefined" ? config.activator : "sigmoid" // Activator (sigmoid/relu/tanh), used as default activator if no neuron/layer activator exists.
         this.r = config.r || config.rate || 0.01 // Learning rate, used in FF network.
         this.m = config.m || config.momentum || 0.01 // Momentum, used in FF network.
         this.i = config.i || config.iterations || 0 // Iterations, used in FF network.
@@ -196,8 +196,9 @@ class Network {
         return this.propagate()
     }
 
-    activate(input, activator) {
-        return activators[activator || this.activator](input)
+    activate(neuron, activator) {
+        if (activator === false) return neuron.input
+        return activators[activator || this.activator](neuron.input + neuron.bias)
     }
 
     propagate() {
@@ -207,13 +208,13 @@ class Network {
             loop = false
             this.layers.forEach((layer, index) =>
                 layer.neurons.forEach(neuron => {
-                    const activator = neuron.activator || layer.activator || this.activator
+                    const activator = typeof neuron.activator !== "undefined" ? neuron.activator : typeof layer.activator !== "undefined" ? layer.activator : this.activator
                     // If this is a standalone neuron, just skip it.
                     if (!neuron.inputs.length && !neuron.outputs.length) return
                     // If this is input layer, and the neuron has no input connections, then its output equals to its input.
                     if (index === 0 && !neuron.inputs.length) neuron.output = neuron.input
                     // Multiply weights and outputs, summarize all inputs, then activate.
-                    else neuron.output = this.activate(neuron.input + neuron.bias, activator)
+                    else neuron.output = this.activate(neuron, activator)
                     // console.log({ id: neuron.id, bias: neuron.bias, activator: activator, inputs: neuron.inputs.map(c => Object.assign({}, { id: c.from.id, output: c.from.output, weight: c.weight })), input: neuron.input, output: neuron.output }, "\n")
                     if (neuron.inputs.some(connection => connection.from.output === undefined)) loop = true
                 })
@@ -263,7 +264,9 @@ class Network {
             // If this is a layer without configs, just return its array of neurons.
             if (Object.keys(data).length === 1 && data.n) return result.n
             for (const key in data) {
-                // Skip defined data.
+                // Skip external keys.
+                // if (key.length > 1) continue
+                // Skip keys with defined value that already exist in result.
                 if (typeof result[key] !== "undefined") continue
                 // Skip undefined data and empty array.
                 if (data[key] === undefined || (Array.isArray(data[key]) && !data[key].length)) continue

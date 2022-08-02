@@ -1,7 +1,7 @@
 class Layer {
     constructor(config = {}) {
         this.n = Array.isArray(config) ? config : config.n || []
-        this.a = config.a || config.activator
+        this.a = typeof config.a !== "undefined" ? config.a : typeof config.activator !== "undefined" ? config.activator : undefined
     }
 
     get neurons() {

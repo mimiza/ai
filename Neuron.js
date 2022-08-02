@@ -5,7 +5,7 @@ class Neuron {
         this["#"] = !isNaN(config["#"]) ? Number(config["#"]) : !isNaN(config.id) ? Number(config.id) : uid() // Unique ID. Make sure 0 is also be assigned.
         this["<"] = config["<"] || config.inputs || [] // Incoming connections.
         this[">"] = config[">"] || config.outputs || [] // Outcoming connections.
-        this.a = config.a || config.activator // Activator, replace layer/network activator.
+        this.a = typeof config.a !== "undefined" ? config.a : typeof config.activator !== "undefined" ? config.activator : undefined // Activator, replace layer/network activator.
         this.b = !isNaN(config.b) ? Number(config.b) : !isNaN(config.bias) ? Number(config.bias) : random(-1, 1) // Bias. Make sure 0 is also be assigned.
         this.i = config.i || config.input || 0 // Input.
         this.o = config.o || config.output || 0 // Output.

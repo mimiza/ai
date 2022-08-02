@@ -127,7 +127,7 @@ class Ecosystem {
             const indexes = parents
                 .filter(item => item.n.some(n => n["#"] === neuron["#"]))
                 .map(item => {
-                    const index = item.l.findIndex(l => l.includes(neuron["#"]))
+                    const index = item.l.findIndex(l => (l?.n || l).includes(neuron["#"]))
                     // Return the index of the last layer of child if this neuron belongs to the last layer of its network.
                     if (index === item.l.length - 1) return child.l.length - 1
                     // By default, return the normal index.
