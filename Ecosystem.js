@@ -1,5 +1,6 @@
 import Network from "./Network.js"
 import { random, merge } from "./Utils.js"
+import activators from "./Activators.js"
 
 class Ecosystem {
     constructor(config = {}) {
@@ -143,13 +144,11 @@ class Ecosystem {
     }
 
     mutate(network) {
-        const activators = ["sigmoid", "relu", "tanh"]
-
         // Add new random layer.
         if (Math.random() < this.mutation.layer && !network.layers.filter(l => !l.n.length).length) network.layer({ index: random(1, network.layers.length - 2) })
 
         // Add new random neuron.
-        if (Math.random() < this.mutation.neuron.rate && (isNaN(this.mutation.neuron.max) || network.neurons.length < this.mutation.neuron.max)) network.neuron({ layer: random(1, network.layers.length - 2), activator: random(activators) })
+        if (Math.random() < this.mutation.neuron.rate && (isNaN(this.mutation.neuron.max) || network.neurons.length < this.mutation.neuron.max)) network.neuron({ layer: random(1, network.layers.length - 2), activator: random(Object.keys(activators)) })
 
         // Add new random connection.
         if (Math.random() < this.mutation.connection.rate) {
@@ -161,7 +160,7 @@ class Ecosystem {
         // Add new random node between a connection.
         if (Math.random() < this.mutation.node && network.connections.length && (typeof this.mutation.neuron.max === "undefined" || network.neurons.length < this.mutation.neuron.max)) {
             const connection = random(network.connections.filter(connection => connection.state))
-            const neuron = network.neuron({ layer: random(1, network.layers.length - 2), activator: random(activators) })
+            const neuron = network.neuron({ layer: random(1, network.layers.length - 2), activator: random(Object.keys(activators)) })
             connection.state = false
             network.connect({ from: connection.from, to: neuron.id })
             network.connect({ from: neuron.id, to: connection.to })

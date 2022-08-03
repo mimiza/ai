@@ -2,6 +2,7 @@ import Connection from "./Connection.js"
 import Layer from "./Layer.js"
 import Neuron from "./Neuron.js"
 import activators from "./Activators.js"
+import derivatives from "./Derivatives.js"
 
 class Network {
     constructor(config = {}) {
@@ -232,17 +233,7 @@ class Network {
                 else neuron.outputs.forEach(connection => (error += connection.to.delta * connection.weight))
                 neuron.error = error
                 const activator = neuron.activator || layer.activator || this.activator
-                switch (activator) {
-                    case "sigmoid":
-                        neuron.delta = error * neuron.output * (1 - neuron.output)
-                        break
-                    case "relu":
-                        neuron.delta = error * (neuron.output >= 0 ? 1 : 0)
-                        break
-                    case "tanh":
-                        neuron.delta = error * (1 - Math.pow(Math.tanh(neuron.output), 2))
-                        break
-                }
+                neuron.delta = error * derivatives[activator](neuron.output)
                 neuron.inputs.forEach(connection => {
                     const change = this.rate * neuron.delta * connection.from.output + this.momentum * connection.change
                     connection.change = change
