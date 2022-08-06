@@ -203,24 +203,37 @@ class Network {
     }
 
     propagate() {
-        let loop = true
-        // Loop until all neurons and their input neurons are activated.
-        while (loop === true) {
-            loop = false
-            this.layers.forEach((layer, index) =>
-                layer.neurons.forEach(neuron => {
-                    const activator = typeof neuron.activator !== "undefined" ? neuron.activator : typeof layer.activator !== "undefined" ? layer.activator : this.activator
-                    // If this is a standalone neuron, just skip it.
-                    if (!neuron.inputs.length && !neuron.outputs.length) return
-                    // If this is input layer, and the neuron has no input connections, then its output equals to its input.
-                    if (index === 0 && !neuron.inputs.length) neuron.output = neuron.input
-                    // Multiply weights and outputs, summarize all inputs, then activate.
-                    else neuron.output = this.activate(neuron, activator)
-                    // console.log({ id: neuron.id, bias: neuron.bias, activator: activator, inputs: neuron.inputs.map(c => Object.assign({}, { id: c.from.id, output: c.from.output, weight: c.weight })), input: neuron.input, output: neuron.output }, "\n")
-                    if (neuron.inputs.some(connection => connection.from.output === undefined)) loop = true
+        const activated = {}
+
+        const layers = {}
+
+        this.layers.forEach((layer, index) => layer.neurons.forEach(neuron => (layers[neuron.id] = index)))
+
+        const activate = (neurons = []) => {
+            const next = []
+            neurons.forEach(neuron => {
+                const index = layers[neuron.id]
+                const layer = this.layers[index]
+                const activator = typeof neuron.activator !== "undefined" ? neuron.activator : typeof layer.activator !== "undefined" ? layer.activator : this.activator
+                // If this is a standalone neuron, just skip it.
+                if (!neuron.inputs.length && !neuron.outputs.length) return
+                // If this is input layer, and the neuron has no input connections, then its output equals to its input.
+                if (index === 0 && neuron.output === undefined) neuron.output = neuron.input
+                // Activate this neuron.
+                else neuron.output = this.activate(neuron, activator)
+                // Calculate the list of next neurons to be activated.
+                neuron.outputs.forEach(connection => {
+                    if (typeof activated[connection.id] === "undefined") activated[connection.id] = 0
+                    if (activated[connection.id] >= connection.timestep) return
+                    if (!next.includes(connection.to.id)) next.push(connection.to.id)
+                    activated[connection.id]++
                 })
-            )
+            })
+            if (next.length) activate(next.map(id => this.neurons[id]))
         }
+
+        activate(this.layers[0].neurons)
+
         // Return the output layer.
         return this.output
     }
@@ -256,7 +269,7 @@ class Network {
             if (Object.keys(data).length === 1 && data.n) return result.n
             for (const key in data) {
                 // Skip external keys.
-                // if (key.length > 1) continue
+                if (key.length > 1) continue
                 // Skip keys with defined value that already exist in result.
                 if (typeof result[key] !== "undefined") continue
                 // Skip undefined data and empty array.

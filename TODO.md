@@ -9,11 +9,11 @@ NEAT ALGO
 -   These need to be fixed:
     -   Network.mutate()
     -   Ecosystem.speciate()
-    -   Ecosystem.generate()
+    -   Ecosystem.produce()
 -   Why NEAT XOR / RAND are not solved?
 
 TODOS:
 
--   generate(): improve size of each species calculation.
+-   produce(): improve size of each species calculation.
 -   connect(): start with zero connection.
 -   Implement neural network topology visualization.

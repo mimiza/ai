@@ -10,12 +10,13 @@ class Ecosystem {
                 neuron: { rate: 0.001, enable: 0.01, disable: 0.001 }, // Add "max" to limit the number of neurons.
                 bias: { rate: 0.1, change: [0, 2] }, // Add min/max to limit the value biases.
                 connection: { rate: 0.01, enable: 0.01, disable: 0.001 },
+                timestep: { rate: 0.01, change: [0, 2] },
                 node: 0.5,
                 weight: { rate: 0.1, change: [0, 2] } // Add min/max to limit the value of weights.
             },
             config?.mutation
         )
-        this.population = config.population || config || [] // Population.
+        this.population = config.population || [] // Population.
         this.species = config.species || [] // Species.
         this.size = config.size || 100 // Population size.
         // Coefficients for compatibility calculation.
@@ -57,7 +58,8 @@ class Ecosystem {
             for (const species of this.species)
                 if (species.length) {
                     // Choose a random representative sample from the species.
-                    const sample = species[Math.floor(Math.random() * species.length)]
+                    // const sample = species[Math.floor(Math.random() * species.length)]
+                    const sample = random(species)
                     const compare = this.compare(individual, sample)
                     if (compare) {
                         species.push(individual)
@@ -68,7 +70,10 @@ class Ecosystem {
             // If no species found, create a new species for this individual.
             if (!speciated) this.species.push([individual])
         })
-        return this.species
+        if (this.species.length > population.length / 10) {
+            this.compatibility++
+            this.speciate(population)
+        } else return this.species
     }
 
     select(species = []) {
@@ -186,6 +191,12 @@ class Ecosystem {
                 if (typeof this.mutation.weight.min !== "undefined") connection.weight = Math.max(connection.weight, this.mutation.weight.min)
                 if (typeof this.mutation.weight.max !== "undefined") connection.weight = Math.min(connection.weight, this.mutation.weight.max)
             }
+            // Change random connection timestep.
+            if (Math.random() < this.mutation.timestep.rate) {
+                connection.timestep += connection.timestep * random(...this.mutation.timestep.change) * random([-1, 1])
+                if (typeof this.mutation.timestep.min !== "undefined") connection.timestep = Math.max(connection.timestep, this.mutation.timestep.min)
+                if (typeof this.mutation.timestep.max !== "undefined") connection.timestep = Math.min(connection.timestep, this.mutation.timestep.max)
+            }
             // Enable random connections.
             if (!connection.state && Math.random() < this.mutation.connection.enable) connection.state = true
             // Disable random connections.
@@ -193,8 +204,7 @@ class Ecosystem {
         })
     }
 
-    generate() {
-        this.speciate()
+    produce() {
         const generation = []
         // Calculate average fitness of the entire population.
         const populationFitness = this.averageFitness()
@@ -202,7 +212,7 @@ class Ecosystem {
         const total = sizes.reduce((value, size) => (value += size), 0)
         const target = total / this.species.length
         this.species.forEach((species, index) => {
-            const size = sizes[index] + ((target - sizes[index]) * 0.5 * this.size) / total
+            const size = sizes[index] + ((target - sizes[index]) * 0.1 * this.size) / total
             for (let i = 0; i < size; i++) {
                 // Select parents and crossover.
                 const father = this.select(species)
@@ -214,7 +224,11 @@ class Ecosystem {
         })
         this.population = generation
         while (this.size < this.population.length) this.population.splice(Math.floor(Math.random() * this.population.length), 1)
-        this.speciate()
+    }
+
+    seed(config = {}) {
+        for (let i = 0; i < this.size; i++) this.population.push(new Network(config))
+        return this.population
     }
 }
 

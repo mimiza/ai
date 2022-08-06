@@ -2,12 +2,18 @@ class Connection {
     constructor(config = {}) {
         this["<"] = config["<"] || config.from // Origin neuron from where this connection starts.
         this[">"] = config[">"] || config.to // Destination neuron to where this connection ends.
+        this["#"] = config["#"] || this.from.id + "-" + this.to.id // Unique ID. Make sure 0 is also be assigned.
         this.w = config.w || config.weight || Math.random()
+        this.t = config.t || config.timestep || 1 // Timestep, used in Recurrent Neural Network.
         this.c = config.c || config.change || 0
         this.s = config.s || config.state || true // State, used in NEAT network, true for ACTIVE, and false for INACTIVE.
         if (!this["<"] || !this[">"]) return undefined
         this["<"]?.[">"].push(this)
         this[">"]?.["<"].push(this)
+    }
+
+    get id() {
+        return this["#"]
     }
 
     get from() {
@@ -35,6 +41,15 @@ class Connection {
     set weight(value) {
         this.w = value
         return this.w
+    }
+
+    get timestep() {
+        return this.t
+    }
+
+    set timestep(value) {
+        this.t = value
+        return this.t
     }
 
     get change() {
